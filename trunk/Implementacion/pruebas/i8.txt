@@ -1,0 +1,6 @@
+#program ocho;
+
+x:integer;
+&
+x:=(3/2)*(11*56)-33;
+

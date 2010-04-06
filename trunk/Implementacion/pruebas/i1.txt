@@ -1,0 +1,6 @@
+#program uno;
+x:integer;
+&
+x:=1;
+out(x);
+

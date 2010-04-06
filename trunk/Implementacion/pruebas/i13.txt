@@ -1,0 +1,15 @@
+#program Trece;
+
+x11y:integer;
+xx12: boolean;
+xx13 : integer;
+xx14 :boolean;
+&
+in(x11y);
+xx13:=1+x11y;
+xx12:= true;
+out(xx13);
+xx14 := not(xx12);
+
+
+ 

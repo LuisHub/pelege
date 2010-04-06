@@ -1,0 +1,14 @@
+# ejemplo luis
+
+valor: float;
+valor2: float;
+valor3: float;
+valor4: float;
+valor5:integer;
+&
+valor:= 2.5e8;
+valor2:= 2.65E5;
+valor3:= 2.5E8;
+valor4:= 2.65e5;
+valor5 := (int) valor4;
+valor:= valor* valor3;

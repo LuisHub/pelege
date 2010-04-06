@@ -1,0 +1,8 @@
+#program diecinueve;
+
+a23:nada;
+&
+a23:=23
+
+
+ 

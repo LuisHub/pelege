@@ -1,0 +1,4 @@
+#program cinco;
+x:integer;
+&
+x:=4 % 2;

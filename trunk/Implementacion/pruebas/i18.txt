@@ -1,0 +1,15 @@
+#program Dieciohco;
+
+abcdefghijklmnopqrstuvwxyz: integer;
+x:integer;
+y:boolean;
+z:boolean;
+aa:boolean;
+&
+abcdefghijklmnopqrstuvwxyz := y; 
+y:=1;
+x:=true;
+aa:= x;
+
+
+ 

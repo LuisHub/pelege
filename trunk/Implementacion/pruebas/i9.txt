@@ -1,0 +1,6 @@
+#program nueve;
+
+x:integer;
+&
+x:=3/2*11+56;
+

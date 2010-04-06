@@ -1,0 +1,9 @@
+#program Diecisies;
+
+x:integer;
+y:boolean;
+&
+x:=true;
+y:=1;
+
+ 

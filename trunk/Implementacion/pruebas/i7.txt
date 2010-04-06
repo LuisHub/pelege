@@ -1,0 +1,6 @@
+#program siete;
+#falla porque X es distinto de x,bien
+x:integer;
+&
+	X:=(3/2)*(11*56)- 33;
+

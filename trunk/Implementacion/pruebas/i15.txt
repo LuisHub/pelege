@@ -1,0 +1,9 @@
+#program CQUince;
+
+x:integer;
+x:boolean;
+&
+x:=1;
+x:=true;
+
+ 
