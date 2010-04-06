@@ -1,0 +1,11 @@
+# ejemplo luis
+
+valor: float;
+valor2: float;
+valor3: float;
+valor4: float;
+&
+valor:= 2.5e8;
+valor2:= 2.65E5;
+valor3:= 2.5E8;
+valor4:= 2.65e5;

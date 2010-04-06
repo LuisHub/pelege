@@ -1,0 +1,16 @@
+#program 
+#unob
+
+x
+:
+integer
+;
+&
+x
+:=
+1
+;
+out
+(x)
+;
+

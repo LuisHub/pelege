@@ -1,0 +1,19 @@
+# Programa de ejemplo
+cantidad: float;
+euros: integer;
+centimos: float;
+valor2: float;
+valor3 : natural;
+valor4 : natural;
+&
+centimos:=valor3 % valor4;
+valor2:= 2.65E5;
+out('.');
+out((char)10);  # Código del carácter salto de línea
+in(cantidad);
+euros := (int)cantidad;
+centimos := cantidad - euros;
+out(euros);
+
+out(centimos);
+

@@ -1,0 +1,21 @@
+#program veinte;
+a:integer;
+b:integer;
+c:integer;
+d:boolean;
+e:boolean;
+f:boolean;
+x:integer;
+&
+x:=(nat)(300/7) % 7;
+x:=4%2;
+e := (a < b);
+in(a);
+in(b);
+c := -(a+b);
+d := not (c=1);
+
+f := not ( not f or not d );
+out(f    	);
+
+ 

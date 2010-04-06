@@ -1,0 +1,11 @@
+#program tres;
+# esta no funciona porque boolean debe ser con minuscula 
+x:boolean;
+y:boolean;
+z:BOOLEAN;
+&
+in(y);
+in(z);
+x:= y or z;
+out(x);
+

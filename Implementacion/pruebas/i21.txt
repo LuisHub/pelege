@@ -1,0 +1,10 @@
+#program veinte;
+
+x:integer;
+y:IntEgEr;
+&
+in(x);
+y:=1+X+4;
+out(y);
+
+ 

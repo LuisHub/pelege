@@ -1,0 +1,10 @@
+#program Diecisiete;
+ 
+x:integer;
+y:boolean;
+&
+y:=1;
+x:=true;
+
+
+ 
