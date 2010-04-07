@@ -10,6 +10,7 @@ import compilador.tabla.*;
 import compilador.tokens.*;
 
 public class AnalizadorSintactico {
+	//esto es una prueba para subir contenido al repositorio willy
 
 	public TablaSimbolos _ts;	
 	public AnalizadorLexico _lexico;	
