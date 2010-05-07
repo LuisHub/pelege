@@ -5,8 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-
-import compilador.tabla.TablaReservadas;
+import java.util.Vector;
 import compilador.tokens.TipoToken;
 import compilador.tokens.Token;
  
@@ -19,7 +18,7 @@ public class AnalizadorLexico {
 	private char actual;
 	private String buffer;
 	private int estado;
-	private TablaReservadas reservadas;
+	private Vector<String> reservadas;
 	private int numLinea;
 	private int numCol;
 	private BufferedReader br;
@@ -34,7 +33,7 @@ public class AnalizadorLexico {
 			numLinea=0;
 			numCol=0;
 			fin=false;
-			reservadas=new TablaReservadas();			
+			reservadas=new Vector<String>();			
 			archivoEntrada=e;			
 	}
 	
@@ -147,6 +146,36 @@ public class AnalizadorLexico {
 					buffer+=actual;
 					actual=siguienteCaracter();
 				}
+				else if (actual=='['){
+					estado=33;
+					buffer+=actual;
+					actual=siguienteCaracter();
+				}
+				else if (actual==']'){
+					estado=34;
+					buffer+=actual;
+					actual=siguienteCaracter();
+				}
+				else if (actual=='.'){
+					estado=35;
+					buffer+=actual;
+					actual=siguienteCaracter();
+				}
+				else if (actual==','){
+					estado=37;
+					buffer+=actual;
+					actual=siguienteCaracter();
+				}
+				else if (actual=='{'){
+					estado=38;
+					buffer+=actual;
+					actual=siguienteCaracter();
+				}
+				else if (actual=='}'){
+					estado=39;
+					buffer+=actual;
+					actual=siguienteCaracter();
+				}
 				else if (actual==' ' || actual=='\r' || actual=='\t' || actual=='\n'){
 					if (actual==' '){
 							numCol++;
@@ -162,7 +191,7 @@ public class AnalizadorLexico {
 					actual=siguienteCaracter();
 				}
 				else if (esSeparador(actual)){
-					if (reservadas.esReservada(buffer)){
+					if (palabraReservada(buffer)){
 						tok= CreaTokenReservada();
 						numCol+=buffer.length();
 						if (actual==' '){
@@ -271,7 +300,14 @@ public class AnalizadorLexico {
 				else tok= new Token(numLinea,numCol,TipoToken.ERROR);
 				break;
 			case 9:
-				if (esSeparador(actual) || esLetra(actual) || esDigito(actual)){
+				
+				if (actual=='>')
+				{
+					estado=36;
+					buffer+=actual;
+					actual=siguienteCaracter();
+					
+				}else if (esSeparador(actual) || esLetra(actual) || esDigito(actual)){
 					tok= new Token(numLinea,numCol,TipoToken.RESTA);
 					numCol+=buffer.length();
 					if (actual==' '){
@@ -453,7 +489,7 @@ public class AnalizadorLexico {
 							} 
 					}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			}
 				
@@ -506,7 +542,7 @@ public class AnalizadorLexico {
 				}
 				else tok= new Token(numLinea,numCol,TipoToken.ERROR);
 				break;
-				//TODO el comentario va a ser chungo luego
+				
 			case 22:
 				if (!(actual=='\r') && !(actual=='\t') && !(actual=='\n')){
 					actual=siguienteCaracter();
@@ -698,6 +734,86 @@ public class AnalizadorLexico {
 				creado=true;
 				}else tok= new Token(numLinea,numCol,TipoToken.ERROR);
 			break;
+			
+			case 33:
+				if (esSeparador(actual) || esLetra(actual) || esDigito(actual)){
+					tok= new Token(numLinea,numCol,TipoToken.CORAP);
+					numCol+=buffer.length();
+					if (actual==' '){
+						numCol++;
+					}
+					creado=true;
+				}
+				else tok= new Token(numLinea,numCol,TipoToken.ERROR);
+			break;
+			
+			case 34:
+				if (esSeparador(actual) || esLetra(actual) || esDigito(actual)){
+					tok= new Token(numLinea,numCol,TipoToken.CORCLA);
+					numCol+=buffer.length();
+					if (actual==' '){
+						numCol++;
+					}
+					creado=true;
+				}
+				else tok= new Token(numLinea,numCol,TipoToken.ERROR);
+			break;
+			case 35:
+				if (esSeparador(actual) || esLetra(actual) || esDigito(actual)){
+					tok= new Token(numLinea,numCol,TipoToken.PUNTO);
+					numCol+=buffer.length();
+					if (actual==' '){
+						numCol++;
+					}
+					creado=true;
+				}
+				else tok= new Token(numLinea,numCol,TipoToken.ERROR);
+			break;
+			case 36:
+				if (esSeparador(actual) || esLetra(actual) || esDigito(actual)){
+					tok= new Token(numLinea,numCol,TipoToken.PUNTERO);
+					numCol+=buffer.length();
+					if (actual==' '){
+						numCol++;
+					}
+					creado=true;
+				}
+				else tok= new Token(numLinea,numCol,TipoToken.ERROR);
+			break;
+			
+			case 37:
+				if (esSeparador(actual) || esLetra(actual) || esDigito(actual)){
+					tok= new Token(numLinea,numCol,TipoToken.COMA);
+					numCol+=buffer.length();
+					if (actual==' '){
+						numCol++;
+					}
+					creado=true;
+				}
+				else tok= new Token(numLinea,numCol,TipoToken.ERROR);
+			break;
+			case 38:
+				if (esSeparador(actual) || esLetra(actual) || esDigito(actual)){
+					tok= new Token(numLinea,numCol,TipoToken.LLAVEAP);
+					numCol+=buffer.length();
+					if (actual==' '){
+						numCol++;
+					}
+					creado=true;
+				}
+				else tok= new Token(numLinea,numCol,TipoToken.ERROR);
+			break;
+			case 39:
+				if (esSeparador(actual) || esLetra(actual) || esDigito(actual)){
+					tok= new Token(numLinea,numCol,TipoToken.LLAVECLA);
+					numCol+=buffer.length();
+					if (actual==' '){
+						numCol++;
+					}
+					creado=true;
+				}
+				else tok= new Token(numLinea,numCol,TipoToken.ERROR);
+			break;
 				
 				
 			}
@@ -708,10 +824,17 @@ public class AnalizadorLexico {
 		return tok;
 	}
 	
+	private boolean palabraReservada(String buffer) {
+		int i=reservadas.indexOf(buffer);
+		if (i==-1)
+		return false;
+		else return true;
+	}
+
 	private Token CreaTokenReservada() {
-		// TODO Auto-generated method stub
 		
-		switch (reservadas.dameIndice(buffer)) {
+		
+		switch (reservadas.indexOf(buffer)) {
 		case 0:
 			return new Token(numLinea,numCol,TipoToken.FLOAT);
 				
@@ -746,7 +869,58 @@ public class AnalizadorLexico {
 			return new Token(numLinea,numCol,TipoToken.AND);
 		
 		case 11:
-			return new Token(numLinea,numCol,TipoToken.OR);			
+			return new Token(numLinea,numCol,TipoToken.OR);	
+			
+		case 12:
+			return new Token(numLinea,numCol,TipoToken.TYPE);
+			
+		case 13:
+			return new Token(numLinea,numCol,TipoToken.RECORD);
+			
+		case 14:
+			return new Token(numLinea,numCol,TipoToken.POINTER);
+		
+		case 15:
+			return new Token(numLinea,numCol,TipoToken.ARRAY);
+		
+		case 16:
+			return new Token(numLinea,numCol,TipoToken.PROCEDURE);
+		
+		case 17:
+			return new Token(numLinea,numCol,TipoToken.NEW);
+		
+		case 18:
+			return new Token(numLinea,numCol,TipoToken.DISPOSE);
+			
+		case 19:
+			return new Token(numLinea,numCol,TipoToken.IF);
+		
+		case 20:
+			return new Token(numLinea,numCol,TipoToken.THEN);
+		
+		case 21:
+			return new Token(numLinea,numCol,TipoToken.ELSE);	
+		
+		case 22:
+			return new Token(numLinea,numCol,TipoToken.NULL);
+		
+		case 23:
+			return new Token(numLinea,numCol,TipoToken.WHILE);
+			
+		case 24:
+			return new Token(numLinea,numCol,TipoToken.DO);
+		
+		case 25:
+			return new Token(numLinea,numCol,TipoToken.VAR);
+		
+		case 26:
+			return new Token(numLinea,numCol,TipoToken.OF);
+		
+		case 27:
+			return new Token(numLinea,numCol,TipoToken.FOR);
+		
+		case 28:
+			return new Token(numLinea,numCol,TipoToken.TO);	
 				
 
 		}
@@ -780,6 +954,12 @@ public class AnalizadorLexico {
 				c=='|' ||
 				c=='&' ||
 				c=='#' ||
+				c=='{' ||
+				c=='}' ||
+				c==',' ||
+				c=='[' ||
+				c==']' ||
+				c=='.' ||
 				c=='\t' ||
 				c=='\r' );
 	}
@@ -787,37 +967,54 @@ public class AnalizadorLexico {
 	
 	
 	private void crearTablaReservadas() {
-		// TODO Auto-generated method stub
-		reservadas.anadePalabra("float",0);
-		reservadas.anadePalabra("char",1);
-		reservadas.anadePalabra("not",2);
-		reservadas.anadePalabra("natural",3);
-		reservadas.anadePalabra("integer",4);
-		reservadas.anadePalabra("boolean",5);
-		reservadas.anadePalabra("in",6);
-		reservadas.anadePalabra("out",7);
-		reservadas.anadePalabra("true",8);
-		reservadas.anadePalabra("false",9);
-		reservadas.anadePalabra("and",10);		
-		reservadas.anadePalabra("or",11);
 		
+		
+		reservadas.add("float");//0
+		reservadas.add("char");//1
+		reservadas.add("not");//2
+		reservadas.add("natural");//3
+		reservadas.add("integer");//4
+		reservadas.add("boolean");//5
+		reservadas.add("in");//6
+		reservadas.add("out");//7
+		reservadas.add("true");//8
+		reservadas.add("false");//9
+		reservadas.add("and");	//	10
+		reservadas.add("or");//11
+		reservadas.add("tipo");//12
+		reservadas.add("record");//13
+		reservadas.add("pointer");//14
+		reservadas.add("array");//15
+		reservadas.add("procedure");//16
+		reservadas.add("new");//17
+		reservadas.add("dispose");//18
+		reservadas.add("if");//19
+		reservadas.add("then");//20
+		reservadas.add("else");//21
+		reservadas.add("null");//22
+		reservadas.add("while");//23
+		reservadas.add("do");//24
+		reservadas.add("var");//25
+		reservadas.add("of");//26
+		reservadas.add("for");//27
+		reservadas.add("to");//28
 		
 	}
 	
 	private void iniciaLector() {
-		// TODO Auto-generated method stub
+		
 		archivo= new File(archivoEntrada);
 		try {
 			fr= new FileReader(archivo);
 			br= new BufferedReader(fr);
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}
 	
 	private char siguienteCaracter() {
-		// TODO Auto-generated method stub
+		
 		try {
 			br.mark(100);
 	
@@ -825,7 +1022,7 @@ public class AnalizadorLexico {
 			else br.reset();
 			char c= (char) br.read();
 			//para que no distinga entre mayúsculas y minúsculas
-			//TODO habra que quitar para distinguir entre mayusculas y minusculas
+			
 			//c = Character.toLowerCase(c);
 			if (c=='\n'){
 				numCol=0;
@@ -839,7 +1036,7 @@ public class AnalizadorLexico {
 			}
 			return c;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 		return '0';

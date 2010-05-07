@@ -317,11 +317,15 @@ public class AnalizadorSintactico {
 			
 			OpResp aux=opdesp();
 			//tipo2 = OpcionA();
-			tipo2=this.Fact();
+			tipo2=Fact();
 			tipo=tipoDeDespl(tipo1,tipo2,aux.getTipo());
-			_instrucciones.add(aux.getCodigo());
+			
+			
+			//_instrucciones.add(aux.getCodigo());
 			
 			tipo = Rdespl(tipo);
+			//creo que la recursion a derechas es solo poner instrucion detras de esto 
+			_instrucciones.add(aux.getCodigo());
 		}
 		else{
 			tipo=tipo1;
@@ -357,91 +361,7 @@ public class AnalizadorSintactico {
 	
 
 
-////////////////////////////////////////////////////////////////	
-	
-	/*
-	public TipoInstruccion OpcionA() throws Error{
-		
-		if (_tokenActual.getTipo()==TipoToken.PARAP)
-		{
-		emparejaToken(TipoToken.PARAP);	
-		return OpcionB();
-		}else {
-			TipoInstruccion tipo;
-			TipoInstruccion tipo2;
-			tipo2= Fact();
-			tipo= Rdespl(tipo2);
-			return tipo;
-				}
-	}
-	
-	private TipoInstruccion OpcionB() throws Error {
-		//  Auto-generated method stub
-		TipoInstruccion tipo=null;
-		
-		// tengo que poner reestriccionde de tipos y traduccion
-		
-		if (_tokenActual.getTipo()==TipoToken.INTEGER)
-		{
-		this.emparejaToken(TipoToken.INTEGER);
-		
-		if (_tokenActual.getTipo()==TipoToken.PARCLA)
-				{
-			this.emparejaToken(TipoToken.PARCLA);
-			tipo=Fact();
-			
-				}else {throw new Error("no encontrado el parentesis de clausura del cansting integer, y encontrado en su lugar  " + _tokenActual.toString());}
-			
-			
-		}
-		else if (_tokenActual.getTipo()==TipoToken.FLOAT)
-		{
-		
-			this.emparejaToken(TipoToken.FLOAT);
-			
-			if (_tokenActual.getTipo()==TipoToken.PARCLA)
-					{
-				this.emparejaToken(TipoToken.PARCLA);
-				tipo=Fact();
-				
-					}else {throw new Error("no encontrado el parentesis de clausura del cansting float, y encontrado en su lugar  " + _tokenActual.toString());}
-				
-		}
-		else if(_tokenActual.getTipo()==TipoToken.CHAR)
-		{
-			
-			this.emparejaToken(TipoToken.CHAR);
-			
-			if (_tokenActual.getTipo()==TipoToken.PARCLA)
-					{
-				this.emparejaToken(TipoToken.PARCLA);
-				tipo=Fact();
-				
-					}else {throw new Error("no encontrado el parentesis de clausura del cansting char, y encontrado en su lugar  " + _tokenActual.toString());}
-				
-		}else {
-			
-			//para que este bien tendra que ser una  expresion
-			
-			if (_tokenActual.getTipo()==TipoToken.PARAP){
-				emparejaToken(TipoToken.PARAP);
-				tipo = Exp();
-				
-				
-				if (_tokenActual.getTipo()==TipoToken.PARCLA)
-					this.emparejaToken(TipoToken.PARCLA);
-						else {throw new Error("no encontrado el parentesis de clausura en la expresion en su lugr a encontrado " + _tokenActual.toString());}
 
-			}
-			
-			}
-			
-		
-		
-		
-		return tipo;
-	}
-*/
 	public TipoInstruccion Fact() throws Error{
 		TipoInstruccion tipo;
 		TipoInstruccion tipo1;		

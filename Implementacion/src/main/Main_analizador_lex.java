@@ -11,7 +11,7 @@ public class Main_analizador_lex {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		AnalizadorLexico a=new AnalizadorLexico("pruebas/i22.txt");
+		AnalizadorLexico a=new AnalizadorLexico("pruebas/i1.txt");
 		
 		a.iniciaLexico();
 		
