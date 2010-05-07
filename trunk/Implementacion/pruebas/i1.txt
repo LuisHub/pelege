@@ -1,6 +1,78 @@
-#program uno;
-x:integer;
+tipo tsecuencia = record {
+integer tope;
+array[100] of float valores
+};
+tipo tarbol = pointer tcelda;
+tipo tcelda = record {
+float valor;
+tarbol izq;
+tarbol der
+};
+procedure aniade(float valor, var tarbol arbol) {
+procedure inserta() {
 &
-x:=1;
-out(x);
+new arbol;
+arbol->.valor := valor;
+arbol->.izq := null;
+arbol->.der := null
+}
+&
+if arbol = null then
+inserta()
+else
+if arbol->.valor < valor then
+aniade(valor, arbol->.izq)
+else
+if arbol->.valor > valor then
+aniade(valor, arbol->.der)
+};
+procedure libera(var tarbol arbol) {
+procedure liberacion(tarbol arbol) {
+&
+if arbol =/= null then {
+liberacion(arbol->.izq);
+liberacion(arbol->.der);
+dispose arbol
+}
+}
+&
+liberacion(arbol);
+arbol := null
+};
+procedure recolecta(var tarbol arbol) {
+float valor;
+boolean fin;
+&
+libera(arbol);
+fin := false;
+while not fin do {
+in(valor);
+if valor >= 0 then
+aniade(valor, arbol)
+else
+fin := true
+}
+};
+procedure aplana(tarbol arbol, var tsecuencia secuencia) {
+procedure hazAplanado(tarbol arbol) {
+&
+if arbol =/= null then {
+hazAplanado(arbol->.izq);
+secuencia.tope := secuencia.tope+1;
+secuencia.valores[secuencia.tope] := arbol->.valor;
+hazAplanado(arbol->.der)
+}
+}
+&
+secuencia.tope := -1;
+hazAplanado(arbol)
+};
+tarbol arbol;
+tsecuencia secuencia
+&
+arbol := null;
+recolecta(arbol);
+aplana(arbol,secuencia);
+libera(arbol)
+
 
