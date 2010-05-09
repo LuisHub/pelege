@@ -16,7 +16,7 @@ import vm.instruccion.*;
 public class MaquinaVirtual {
 
 	private Vector<Instruccion> instrucciones;
-	private int pc;
+	private int pc, sig_pc;;
 	private Instruccion instruccionActual;
 	public double[] memoria;
 	public double operando1;
@@ -37,7 +37,8 @@ public class MaquinaVirtual {
 		for (int i=0; i<32; i++)
 			memoria[i] = 0;
 		pila = new Stack<Double>();
-		pc = 0;		
+		pc = 0;
+		sig_pc = 1;
 	}
 	
 	public void run(){
@@ -55,7 +56,8 @@ public class MaquinaVirtual {
 					br.readLine();
 				} catch (IOException e) {}
 			}			
-			pc++;			
+			pc = sig_pc;
+			sig_pc++;			
 			try{
 				instruccionActual = instrucciones.get(pc);
 			}
