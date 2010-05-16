@@ -20,7 +20,7 @@ public class InstruccionIRA extends InstruccionConOperando{
 	}
 
 	public void ejecuta(){		
-		vm.sig_pc = operando;
+		vm.setSig_pc(operando);
 	}
 	
 	public String toString(){

@@ -120,7 +120,7 @@ public class Main {
 	private static void printUsage() {
 		System.out.println("Uso: -c  --compilador");
 		System.out.println("     -m  --maquinavirtual");		
-		System.out.println("(compiador):");
+		System.out.println("(compilador):");
 		System.out.println("-i --input  fichero : fichero de entrada.");
 		System.out.println("-o --output fichero : fichero de salida.");
 		System.out.println("(maquina virtual):");

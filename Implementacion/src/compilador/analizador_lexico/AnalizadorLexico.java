@@ -10,8 +10,7 @@ import compilador.tokens.TipoToken;
 import compilador.tokens.Token;
  
 
-
-
+ 
 
 public class AnalizadorLexico {
 	

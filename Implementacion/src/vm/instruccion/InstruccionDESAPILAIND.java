@@ -14,7 +14,7 @@ public class InstruccionDESAPILAIND extends Instruccion{
 	public void ejecuta(){		
 		vm.operando1 = vm.pila.pop();
 		vm.operando2 = vm.pila.pop();
-		vm.memoria[vm.operando2]=vm.operando1;		
+		vm.memoria[(int) vm.operando2]=vm.operando1;		
 	}
 	
 	public String toString(){

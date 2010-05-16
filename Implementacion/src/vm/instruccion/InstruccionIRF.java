@@ -20,7 +20,7 @@ public class InstruccionIRF extends InstruccionConOperando{
 	public void ejecuta(){
 		vm.operando1 = vm.pila.pop();
 		if (vm.operando1 == 0)
-			vm.sig_pc = operando;
+			vm.setSig_pc(operando);
 	}
 	
 	public String toString(){
