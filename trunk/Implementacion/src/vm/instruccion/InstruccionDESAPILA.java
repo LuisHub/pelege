@@ -12,6 +12,7 @@ public class InstruccionDESAPILA extends Instruccion {
 		// TODO Auto-generated method stub
 		vm.pila.pop();
 		vm.pc++;
+		//revisar el contador++
 	}
 
 	public String toString(){

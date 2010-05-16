@@ -1,0 +1,23 @@
+# desplazamiento y módulo
+#desplz asocia por dcha
+#mod asocia por izda
+#mod tiene más prioridad que desplz
+
+a:integer;
+b:integer;
+c:integer;
+d:integer;
+e:integer;
+&
+#modulo
+a:=2;
+b:=3;
+c:=10;
+d:=c%a%b;
+out(d);
+d:=0;
+out(d);
+e:=c % b % a;
+out(e);
+e:=1;
+out(e);

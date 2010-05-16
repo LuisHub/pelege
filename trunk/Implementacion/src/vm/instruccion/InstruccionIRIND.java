@@ -11,7 +11,7 @@ public class InstruccionIRIND extends Instruccion {
 	public void ejecuta() {
 		// TODO Auto-generated method stub
 		vm.operando1 = vm.pila.pop();
-		vm.sig_pc = vm.operando1;
+		vm.setSig_pc((int) vm.operando1);
 	}
 
 	public String toString(){

@@ -38,7 +38,7 @@ public class MaquinaVirtual {
 			memoria[i] = 0;
 		pila = new Stack<Double>();
 		pc = 0;
-		sig_pc = 1;
+		setSig_pc(1);
 	}
 	
 	public void run(){
@@ -56,8 +56,8 @@ public class MaquinaVirtual {
 					br.readLine();
 				} catch (IOException e) {}
 			}			
-			pc = sig_pc;
-			sig_pc++;			
+			pc = getSig_pc();
+			setSig_pc(getSig_pc() + 1);			
 			try{
 				instruccionActual = instrucciones.get(pc);
 			}
@@ -102,6 +102,14 @@ public class MaquinaVirtual {
 			else
 				System.out.print("["+memoria[i]+"]");		
 		}
+	}
+
+	public void setSig_pc(int sig_pc) {
+		this.sig_pc = sig_pc;
+	}
+
+	public int getSig_pc() {
+		return sig_pc;
 	}
 	
 }

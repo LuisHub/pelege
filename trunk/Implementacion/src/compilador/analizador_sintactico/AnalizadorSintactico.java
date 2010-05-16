@@ -15,7 +15,7 @@ public class AnalizadorSintactico {
 	public AnalizadorLexico _lexico;	
 	public Vector<Instruccion> _instrucciones;
 	public Token _tokenActual;
-	
+ 
 	public AnalizadorSintactico(String e){
 		_ts = new TablaSimbolos();
 		_lexico= new AnalizadorLexico(e);
@@ -277,7 +277,8 @@ public class AnalizadorSintactico {
 		TipoInstruccion tipo2;		
 		if (_tokenActual.getTipo()==TipoToken.MULT  || 
 			_tokenActual.getTipo()==TipoToken.DIV  || 
-			_tokenActual.getTipo()==TipoToken.AND){
+			_tokenActual.getTipo()==TipoToken.AND ||
+			_tokenActual.getTipo()==TipoToken.PORCEN) {
 			
 			OpResp resp= OpMul();
 			tipo2 = despl();
@@ -311,15 +312,13 @@ public class AnalizadorSintactico {
 		TipoInstruccion tipo;
 		TipoInstruccion tipo2;
 		if (_tokenActual.getTipo()==TipoToken.DESPDER  || 
-			_tokenActual.getTipo()==TipoToken.DESPIZQ 
-			||_tokenActual.getTipo()==TipoToken.PORCEN){				
+			_tokenActual.getTipo()==TipoToken.DESPIZQ ){				
 			
 			OpResp aux=opdesp();
 			//tipo2 = OpcionA();
 			tipo2=Fact();
 			tipo=tipoDeDespl(tipo1,tipo2,aux.getTipo());
-			
-			
+						
 			//_instrucciones.add(aux.getCodigo());
 			
 			tipo = Rdespl(tipo);
@@ -332,34 +331,6 @@ public class AnalizadorSintactico {
 		return tipo;
 	}
 	
-	
-	private OpResp opdesp() throws Error
-	{
-		
-		Instruccion codigo = null;
-		TipoInstruccion tipo = null;
-		if (_tokenActual.getTipo()==TipoToken.DESPIZQ){					
-			codigo = new InstruccionDESPI();
-			tipo = TipoInstruccion.DESP;
-			emparejaToken(TipoToken.DESPIZQ);
-		}	
-		else if (_tokenActual.getTipo()==TipoToken.DESPDER){					
-			codigo = new InstruccionDESPD();
-			tipo = TipoInstruccion.DESP;
-			emparejaToken(TipoToken.DESPDER);
-		}
-		else if (_tokenActual.getTipo()==TipoToken.PORCEN){	//TODO ponerlo en opmul no aqui				
-			codigo = new InstruccionMOD();
-			tipo = TipoInstruccion.NUMERICA;
-			emparejaToken(TipoToken.PORCEN);
-		}
-		
-		return new OpResp(codigo,tipo);
-	}
-	
-	
-
-
 
 	public TipoInstruccion Fact() throws Error{
 		TipoInstruccion tipo;
@@ -498,12 +469,39 @@ public class AnalizadorSintactico {
 			tipo = TipoInstruccion.BOOLEAN;
 			emparejaToken(TipoToken.AND);
 		}
+		else if (_tokenActual.getTipo()==TipoToken.PORCEN){	//TODO ponerlo en opmul no aqui				
+			codigo = new InstruccionMOD();
+			tipo = TipoInstruccion.NUMERICA;
+			emparejaToken(TipoToken.PORCEN);
+		}
+		
 		else			
 			throw new Error("OpMul: Se esperaba tokenMULT, tokenDIV o tokenAND y no " + _tokenActual.toString());
 		
 		return new OpResp(codigo,tipo);
 		
 	}
+	
+	
+	private OpResp opdesp() throws Error
+	{
+		
+		Instruccion codigo = null;
+		TipoInstruccion tipo = null;
+		if (_tokenActual.getTipo()==TipoToken.DESPIZQ){					
+			codigo = new InstruccionDESPI();
+			tipo = TipoInstruccion.DESP;
+			emparejaToken(TipoToken.DESPIZQ);
+		}	
+		else if (_tokenActual.getTipo()==TipoToken.DESPDER){					
+			codigo = new InstruccionDESPD();
+			tipo = TipoInstruccion.DESP;
+			emparejaToken(TipoToken.DESPDER);
+		}
+		
+		return new OpResp(codigo,tipo);
+	}
+	
 	
 	public OpResp OpComp() throws Error{
 		Instruccion codigo = null;

@@ -16,7 +16,7 @@ public class InstruccionMUEVE extends Instruccion{
 		vm.operando1 = vm.pila.pop();
 		vm.operando2 = vm.pila.pop();
 		for (int i=0;i<operando;i++)
-			vm.memoria[vm.operando2+i] = vm.memoria[vm.operando1+i];
+			vm.memoria[(int) (vm.operando2+i)] = vm.memoria[(int) (vm.operando1+i)];
 	}
 	
 	public String toString(){

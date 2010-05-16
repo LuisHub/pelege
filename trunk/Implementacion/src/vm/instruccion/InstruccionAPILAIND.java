@@ -9,7 +9,7 @@ public class InstruccionAPILAIND extends Instruccion{
 
 	public void ejecuta(){		
 		vm.operando1 = vm.pila.pop();		
-		vm.pila.push(vm.memoria[vm.operando1]);		
+		vm.pila.push(vm.memoria[(int) vm.operando1]);		
 	}
 	
 	public String toString(){

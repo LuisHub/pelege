@@ -12,6 +12,7 @@ public class InstruccionCOPIA extends Instruccion {
 		// TODO Auto-generated method stub
 		vm.pila.push(vm.pila.peek());
 		vm.pc++;
+		//revisar el contador++
 	}
 
 	public String toString(){
