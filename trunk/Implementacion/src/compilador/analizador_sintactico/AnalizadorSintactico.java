@@ -863,6 +863,8 @@ public void RDecs() throws Error {
 		emparejaToken(TipoToken.ASIG);
 		boolean parh=false;
 		Tipo tipo2 = Exp(parh).getTipo();
+		
+		//fallaasig() es lo que tenia antes
 		//TODO tengo que hacerme la compatibilidad
 		/*
 		if (compatibles(tipo1,tipo2)){
@@ -884,8 +886,24 @@ public void RDecs() throws Error {
 
 	// _tokenActual -> TokenREAD
 	public void InstrLect() throws Error {
+		
+		
 		emparejaToken(TipoToken.READ);
 		emparejaToken(TipoToken.PARAP);
+		Tipo tipo = Mem(null);
+		_instrucciones.add(new InstruccionIN());
+		_etq++;
+		if (tipo.getTipo()!=ETipo.ERR){
+			_instrucciones.add(new InstruccionDESAPILAIND());
+			_etq++;
+			emparejaToken(TipoToken.PARCLA);
+			emparejaToken(TipoToken.SEPARADOR);
+		}			
+		else
+			throw new Error("InstrLect: Tipo de Mem = ERR " + _tokenActual.toString());
+	
+		
+/*		
 		if (_tokenActual.getTipo() == TipoToken.ID) {
 			String lex = _tokenActual.getLexema();
 			if (!_ts.existeId(lex))
@@ -899,6 +917,7 @@ public void RDecs() throws Error {
 		} else
 			throw new Error("InstrLect: Se esperaba tokenID y no "
 					+ _tokenActual.toString());
+*/
 	}
 
 	// _tokenActual -> TokenWRITE
@@ -906,8 +925,9 @@ public void RDecs() throws Error {
 		emparejaToken(TipoToken.WRITE);
 		emparejaToken(TipoToken.PARAP);
 		Token tokenTmp = _tokenActual;
-		TipoInstruccion tipo = Exp();
-		if (tipo != TipoInstruccion.ERROR) {
+		boolean parh = false;
+		Tipo tipo = Exp(parh).getTipo();
+		if (tipo.getTipo() != ETipo.ERR) {
 			emparejaToken(TipoToken.PARCLA);
 			emparejaToken(TipoToken.SEPARADOR);
 			_instrucciones.add(new InstruccionOUT());
@@ -1357,34 +1377,34 @@ public void RDecs() throws Error {
 
 	//
 
-	public TipoInstruccion tipoDeFact(TipoInstruccion tOperador,
-			TipoInstruccion tOperando)
+	public Tipo tipoDeFact(Tipo tOperador,
+			Tipo tOperando)
 	// Comprueba que el tipo de tOperador y de tOperando sean compatibles. En
 	// caso de serlo devuelve dicho tipo y en caso contrario devuelve err.
 	{
 
-		if ((tOperador == TipoInstruccion.INTEGER
-				|| tOperador == TipoInstruccion.NATURAL
-				|| tOperador == TipoInstruccion.NUMERICA
-				|| tOperador == TipoInstruccion.CHARACTER || tOperador == TipoInstruccion.FLOAT)
-				&& (tOperando == TipoInstruccion.BOOLEAN))
-			return TipoInstruccion.ERROR;
-		else if ((tOperador == TipoInstruccion.INTEGER
-				|| tOperador == TipoInstruccion.NATURAL
-				|| tOperador == TipoInstruccion.NATURAL || tOperador == TipoInstruccion.NUMERICA)
-				&& tOperando == TipoInstruccion.CHARACTER)// casting
-			return TipoInstruccion.ERROR;
+		if ((tOperador.getTipo() == ETipo.INTEGER
+				|| tOperador.getTipo() == ETipo.NATURAL
+				|| tOperador.getTipo() == ETipo.NUMERICA
+				|| tOperador.getTipo() == ETipo.CHAR || tOperador.getTipo() == ETipo.FLOAT)
+				&& (tOperando.getTipo() == ETipo.BOOLEAN))
+			return new Tipo(ETipo.ERR);
+		else if ((tOperador.getTipo() == ETipo.INTEGER
+				|| tOperador.getTipo() == ETipo.NATURAL
+				|| tOperador.getTipo() == ETipo.NATURAL || tOperador.getTipo() == ETipo.NUMERICA)
+				&& tOperando.getTipo() == ETipo.CHAR)// casting
+			return new Tipo(ETipo.ERR);
 		/*
 		 * else if(tOperador== || && (tOperando.tipo == boolean ||
 		 * tOperando.tipo == boolean))//valor abs return <tipo:’err’>
 		 */
-		else if (tOperador == TipoInstruccion.CHARACTER
-				&& (tOperando == TipoInstruccion.INTEGER || tOperando == TipoInstruccion.FLOAT))
-			return TipoInstruccion.ERROR;
-		else if (tOperador == TipoInstruccion.NUMERICA
-				&& tOperando == TipoInstruccion.NATURAL)
-			return TipoInstruccion.ERROR;
-		else if (tOperador == TipoInstruccion.NUMERICA)
+		else if (tOperador.getTipo() == ETipo.CHAR
+				&& (tOperando.getTipo() == ETipo.INTEGER || tOperando.getTipo() == ETipo.FLOAT))
+			return new Tipo(ETipo.ERR);
+		else if (tOperador.getTipo() == ETipo.NUMERICA
+				&& tOperando.getTipo() == ETipo.NATURAL)
+			return new Tipo(ETipo.ERR);
+		else if (tOperador.getTipo() == ETipo.NUMERICA)
 			return tOperando;
 		else
 			return tOperador;
