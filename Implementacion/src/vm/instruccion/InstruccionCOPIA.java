@@ -11,7 +11,7 @@ public class InstruccionCOPIA extends Instruccion {
 	public void ejecuta() {
 		// TODO Auto-generated method stub
 		vm.pila.push(vm.pila.peek());
-		vm.pc++;
+		vm.setPc(vm.getPc() + 1);
 		//revisar el contador++
 	}
 

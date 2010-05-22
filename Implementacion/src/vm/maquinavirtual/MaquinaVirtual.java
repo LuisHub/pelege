@@ -37,16 +37,16 @@ public class MaquinaVirtual {
 		for (int i=0; i<32; i++)
 			memoria[i] = 0;
 		pila = new Stack<Double>();
-		pc = 0;
+		setPc(0);
 		setSig_pc(1);
 	}
 	
 	public void run(){
-		instruccionActual = instrucciones.get(pc);
+		instruccionActual = instrucciones.get(getPc());
 		while ((instruccionActual != null) && !(instruccionActual instanceof InstruccionSTOP)){						
 			instruccionActual.ejecuta();
 			if (modoTraza){
-				System.out.println("PC->" + pc);				
+				System.out.println("PC->" + getPc());				
 				System.out.println(instruccionActual.toString());
 				System.out.println("PILA");
 				System.out.println(pila.toString());
@@ -56,10 +56,10 @@ public class MaquinaVirtual {
 					br.readLine();
 				} catch (IOException e) {}
 			}			
-			pc = getSig_pc();
+			setPc(getSig_pc());
 			setSig_pc(getSig_pc() + 1);			
 			try{
-				instruccionActual = instrucciones.get(pc);
+				instruccionActual = instrucciones.get(getPc());
 			}
 			catch(Exception e){
 				instruccionActual = null;
@@ -110,6 +110,14 @@ public class MaquinaVirtual {
 
 	public int getSig_pc() {
 		return sig_pc;
+	}
+
+	public void setPc(int pc) {
+		this.pc = pc;
+	}
+
+	public int getPc() {
+		return pc;
 	}
 	
 }
