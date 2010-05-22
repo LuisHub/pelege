@@ -1,6 +1,6 @@
 package vm.instruccion;
 
-public class InstruccionAPILA extends Instruccion{
+public class InstruccionAPILA extends InstruccionConOperando{
 	
 	/**
 	 * 
@@ -20,6 +20,10 @@ public class InstruccionAPILA extends Instruccion{
 	@Override
 	public String toString(){
 		return "APILA("+operando+")";
+	}
+	
+	public void setOperando(int operando) {
+		this.operando = operando;
 	}
 	
 }
