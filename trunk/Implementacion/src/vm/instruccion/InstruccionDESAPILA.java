@@ -11,7 +11,7 @@ public class InstruccionDESAPILA extends Instruccion {
 	public void ejecuta() {
 		// TODO Auto-generated method stub
 		vm.pila.pop();
-		vm.pc++;
+		vm.setPc(vm.getPc() + 1);
 		//revisar el contador++
 	}
 

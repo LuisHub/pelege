@@ -761,9 +761,54 @@ public void RDecs() throws Error {
 							+ _tokenActual.toString());
 	}
 
+	public void InstrIf() throws Error{		
+		emparejaToken(TipoToken.IF);
+		boolean parh=false;
+		Tipo tipo = Exp(parh).getTipo();
+		if (tipo.getTipo() == ETipo.BOOLEAN){
+			emparejaToken(TipoToken.THEN);
+			int etq1 = _etq;	
+			_instrucciones.add(new InstruccionIRF(valorIndefinido));
+			_etq++;
+			Instr();
+			int etq2 = _etq;
+			_instrucciones.add(new InstruccionIRA(valorIndefinido));
+			_etq++;
+			parchea(etq1, _etq);
+			PElse();
+			parchea(etq2, _etq);
+		}
+		else
+			throw new Error("InstrIf: El tipo de la expresión no es BOOLEAN.");	
+	}
+	
+	public void PElse() throws Error{
+		if (_tokenActual.getTipo()==TipoToken.ELSE){
+			emparejaToken(TipoToken.ELSE);
+			Instr();	
+		}
+	}
+	
+	public void InstrWhile() throws Error{		
+		emparejaToken(TipoToken.WHILE);
+		int etq1 = _etq;
+		boolean parh=false;
+		Tipo tipo = Exp(parh).getTipo();
+		if (tipo.getTipo() == ETipo.BOOLEAN){
+			//emparejaToken(EToken.DO);			
+			_instrucciones.add(new InstruccionIRF(valorIndefinido));
+			int etq2 = _etq;
+			_etq++;
+			Instr();			
+			_instrucciones.add(new InstruccionIRA(etq1));
+			_etq++;
+			parchea(etq2, _etq);
+		}
+		else
+			throw new Error("InstrWhile: El tipo de la expresión no es BOOLEAN.");	
+	}
 
-
-	private void InstrId() throws Error {
+	public void InstrId() throws Error {
 		Token tokenid= new Token(_tokenActual.getNumLinea(),_tokenActual.getNumColumna(),_tokenActual.getLexema(),_tokenActual.getTipo());
 		emparejaToken(TipoToken.ID);
 		if (_tokenActual.getTipo()==TipoToken.ASIG ||
@@ -1057,9 +1102,11 @@ public void RDecs() throws Error {
 	}
 
 	public Resp Rdespl(Tipo tipo1, EModo modo1) throws Error {
+
 		Resp respfinal;
 		Resp tipo2;
 		Tipo tipo;
+
 		if (_tokenActual.getTipo() == TipoToken.DESPDER
 				|| _tokenActual.getTipo() == TipoToken.DESPIZQ
 				|| _tokenActual.getTipo() == TipoToken.PORCEN) {
@@ -1072,7 +1119,9 @@ public void RDecs() throws Error {
 
 			// _instrucciones.add(aux.getCodigo());
 
+
 			respfinal = Rdespl(tipo,modo1);
+
 			// creo que la recursion a derechas es solo poner instrucion detras
 			// de esto
 			_instrucciones.add(aux.getCodigo());
@@ -1082,7 +1131,10 @@ public void RDecs() throws Error {
 		return respfinal;
 	}
 
+
+
 	private Resp opdesp() throws Error {
+
 
 		Instruccion codigo = null;
 		Tipo tipo = null;
@@ -1094,12 +1146,6 @@ public void RDecs() throws Error {
 			codigo = new InstruccionDESPD();
 			tipo =new Tipo(ETipo.DESP);
 			emparejaToken(TipoToken.DESPDER);
-		} else if (_tokenActual.getTipo() == TipoToken.PORCEN) { // TODO ponerlo
-																	// en opmul
-																	// no aqui
-			codigo = new InstruccionMOD();
-			tipo =new Tipo(ETipo.NUMERICA);
-			emparejaToken(TipoToken.PORCEN);
 		}
 
 		return new Resp(codigo, tipo);
@@ -1293,9 +1339,13 @@ public void RDecs() throws Error {
 			codigo = new InstruccionAND();
 			tipo =new Tipo(ETipo.BOOLEAN);
 			emparejaToken(TipoToken.AND);
-		} else
+		} else if (_tokenActual.getTipo()==TipoToken.PORCEN){				
+			codigo = new InstruccionMOD();
+			tipo = new Tipo(ETipo.NUMERICA);
+			emparejaToken(TipoToken.PORCEN);
+		}else
 			throw new Error(
-					"OpMul: Se esperaba tokenMULT, tokenDIV o tokenAND y no "
+					"OpMul: Se esperaba tokenMULT, tokenDIV, tokenAND o tokenPORCEN y no "
 							+ _tokenActual.toString());
 
 		return new Resp(codigo, tipo);
