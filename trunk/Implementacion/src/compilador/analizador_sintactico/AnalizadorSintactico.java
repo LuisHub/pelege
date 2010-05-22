@@ -580,7 +580,7 @@ public void pasoParametro(EModo modoReal,Parametro pFormal){
 
 
 public void parchea(int etqInstruccion, int operando){
-	InstruccionConOperando i = (InstruccionConOperando)_instrucciones.get(etqInstruccion);
+	InstruccionConOperando i = (InstruccionConOperando) _instrucciones.get(etqInstruccion);
 	i.setOperando(operando);				
 }
 
