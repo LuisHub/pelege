@@ -13,9 +13,14 @@ public class Main_Sintactico {
 		// TODO Auto-generated method stub
 		
 		
-		AnalizadorSintactico a=new AnalizadorSintactico("pruebas/i2.txt");
+		AnalizadorSintactico a=new AnalizadorSintactico("pruebas/i13.txt");
 		
 		a.init();
+		
+		for (int i=0;i<a.get_instrucciones().size();i++)
+		{
+			System.out.println(a.get_instrucciones().get(i).toString());
+		}
 
 	}
 
