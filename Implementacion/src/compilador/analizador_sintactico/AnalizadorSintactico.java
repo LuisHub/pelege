@@ -873,15 +873,15 @@ public void RDecs() throws Error {
 		Resp resp = Exp(parh);
 		pasoParametro(resp.getModo(),params.get(0));
 		_etq = _etq + longPasoParametro;
-		//TODO compatibilidad
-		/*
+
+		
 		if (params.size() == 0 || 
 			params.get(0).getModo() == EModo.VARIABLE && resp.getModo() == EModo.VALOR 
 			|| !compatibles(params.get(0).getTipo(), resp.getTipo()))
 			throw new Error("LRParams: ERROR");
 		else
 			
-			*/
+			
 		return RLRParams(params, 1);
 		}
 
@@ -897,16 +897,15 @@ public void RDecs() throws Error {
 			pasoParametro(resp.getModo(), params.get(nparams));
 			_etq += longPasoParametro;
 			
-			//TODO compatibilidad
-			/*
+			
 			if (nparams > params.size() ||
 			params.get(nparams).getModo() == EModo.VARIABLE && resp.getModo() == EModo.VALOR 
 			|| !compatibles(params.get(nparams).getTipo(), resp.getTipo()))
 				throw new Error("RLRParams: ERROR");
 			else	
 			return RLRParams(params, nparams+1);
-		*/
-			return 0;
+		
+			
 		}
 		else{
 			return nparams;
@@ -922,12 +921,11 @@ public void RDecs() throws Error {
 		emparejaToken(TipoToken.ASIG);
 		boolean parh=false;
 		Tipo tipo2 = Exp(parh).getTipo();
-		emparejaToken(TipoToken.SEPARADOR);
-		_instrucciones.add(new InstruccionDESAPILAIND());
+		
 		
 		//TODO fallaasig() es lo que tenia antes
 		//TODO tengo que hacerme la compatibilidad
-		/*
+		
 		if (compatibles(tipo1,tipo2)){
 			if (compatibles(tipo1, new Tipo(ETipo.INTEGER)) || 
 				compatibles(tipo1, new Tipo(ETipo.BOOLEAN)))
@@ -935,11 +933,11 @@ public void RDecs() throws Error {
 			else
 				_instrucciones.add(new InstruccionMUEVE(tipo1.getTam()));
 			_etq++;
-			emparejaToken(EToken.SEPARADOR);
+			emparejaToken(TipoToken.SEPARADOR);
 		}
 		else
 			throw new Error("InstrAsig: Tipos no compatibles " + _tokenActual.toString());				
-	*/
+	
 		
 		
 
@@ -1085,6 +1083,7 @@ public void RDecs() throws Error {
 		Resp resp2;
 		if (_tokenActual.getTipo() == TipoToken.MULT
 				|| _tokenActual.getTipo() == TipoToken.DIV
+				|| _tokenActual.getTipo() == TipoToken.PORCEN
 				|| _tokenActual.getTipo() == TipoToken.AND) {
 
 			Resp resp = OpMul();
@@ -1120,12 +1119,11 @@ public void RDecs() throws Error {
 		Resp respfinal;
 		Resp tipo2;
 		Tipo tipo;
-		//TODO porcentaje no iba en otra  funcion?????
+		
 		if (_tokenActual.getTipo() == TipoToken.DESPDER
-				|| _tokenActual.getTipo() == TipoToken.DESPIZQ
-				|| _tokenActual.getTipo() == TipoToken.PORCEN) {
+				|| _tokenActual.getTipo() == TipoToken.DESPIZQ) {
 
-			//TODO mirar que no tenga operacion de desplazamiento
+			
 			Resp aux = opdesp();
 			// tipo2 = OpcionA();
 			boolean parch=false;
@@ -1148,7 +1146,7 @@ public void RDecs() throws Error {
 	private Resp opdesp() throws Error {
 
 		Instruccion codigo = null;
-		Tipo tipo = null;
+		Tipo tipo =new Tipo(ETipo.ERR); ;
 		if (_tokenActual.getTipo() == TipoToken.DESPIZQ) {
 			codigo = new InstruccionDESPI();
 			tipo =new Tipo(ETipo.DESP);
@@ -1157,10 +1155,6 @@ public void RDecs() throws Error {
 			codigo = new InstruccionDESPD();
 			tipo =new Tipo(ETipo.DESP);
 			emparejaToken(TipoToken.DESPDER);
-		} else if (_tokenActual.getTipo() == TipoToken.PORCEN) { 
-			codigo = new InstruccionMOD();
-			tipo =new Tipo(ETipo.NUMERICA);
-			emparejaToken(TipoToken.PORCEN);
 		}
 
 		return new Resp(codigo, tipo);
@@ -1252,6 +1246,7 @@ public void RDecs() throws Error {
 
 			resp = new Resp(Mem(null), EModo.VARIABLE);
 			//TODO yo creo que aqui no hace falta nada parchin aqui lo usa
+			//Compatibilidad
 			/*
 			if ((compatibles(tipo.getTipo(), new Tipo(ETipo.INTEGER)) || 
 				compatibles(tipo.getTipo(), new Tipo(ETipo.BOOLEAN)))&& !parhin){
@@ -1339,7 +1334,7 @@ public void RDecs() throws Error {
 		}//TODO esto va a ir fuera 
 		else if (_tokenActual.getTipo()==TipoToken.PORCEN){				
 			codigo = new InstruccionMOD();
-			tipo = new Tipo(ETipo.NUMERICA);
+			tipo = new Tipo(ETipo.MOD);
 			emparejaToken(TipoToken.PORCEN);
 		}else
 			throw new Error(
@@ -1499,7 +1494,14 @@ public void RDecs() throws Error {
 						&& (tOperando1.getTipo() == ETipo.BOOLEAN))
 					return new Tipo(ETipo.BOOLEAN);
 				else
-					return new Tipo(ETipo.ERR);
+					if (tipoInstruccion.getTipo() == ETipo.MOD) {
+						
+					if ((tOperando1.getTipo()==ETipo.NATURAL ||tOperando1.getTipo()==ETipo.INTEGER)
+						&&(tOperando2.getTipo()==ETipo.NATURAL))
+						return new Tipo(ETipo.INTEGER);
+					else return new Tipo(ETipo.ERR);
+						
+					}else return new Tipo(ETipo.ERR);
 
 			}
 
@@ -1532,30 +1534,7 @@ public void RDecs() throws Error {
 		}
 
 	}
-//TODO no se si me va a hacer falta
-	public boolean fallaasig(TipoInstruccion a, TipoInstruccion b) {
-		boolean falla = false;
-		if ((a == TipoInstruccion.CHARACTER)
-				&& (b != TipoInstruccion.CHARACTER))
-			falla = true;
 
-		if ((a == TipoInstruccion.BOOLEAN) && (b != TipoInstruccion.BOOLEAN))
-			falla = true;
-
-		if ((a == TipoInstruccion.NATURAL) && (b != TipoInstruccion.NATURAL))
-			falla = true;
-
-		if ((a == TipoInstruccion.INTEGER)
-				&& ((b != TipoInstruccion.NATURAL) && (b != TipoInstruccion.INTEGER)))
-			falla = true;
-
-		if ((a == TipoInstruccion.FLOAT)
-				&& ((b != TipoInstruccion.NATURAL)
-						&& (b != TipoInstruccion.INTEGER) && (b != TipoInstruccion.FLOAT)))
-			falla = true;
-
-		return falla;
-	}
 
 	public Tipo tipoDeDespl(Tipo tOperador1,
 			Tipo tOperador2, Tipo tOperacion) {
@@ -1583,5 +1562,73 @@ public void RDecs() throws Error {
 			}
 		}
 	}
+	
+	
+	
+	
+	
+	public boolean compatibles(Tipo tipo1, Tipo tipo2){
+		Vector<Tipo> visitadas = new Vector<Tipo>();		
+		return compatibles2(tipo1, tipo2, visitadas);
+	}
+	
+	public boolean compatibles2(Tipo tipo1, Tipo tipo2, Vector<Tipo> visitadas){
+		if (visitadas.contains(tipo1) && visitadas.contains(tipo2))
+			return true;
+		else{
+			visitadas.add(tipo1);
+			visitadas.add(tipo2);
+		
+			if ((tipo1.getTipo() == ETipo.CHAR&& tipo2.getTipo() == ETipo.CHAR)
+				||(tipo1.getTipo() == ETipo.BOOLEAN && tipo2.getTipo() == ETipo.BOOLEAN )
+				||(tipo1.getTipo() == ETipo.NATURAL && tipo2.getTipo() == ETipo.NATURAL ))
+				return true;
+			
+			else if (tipo1.getTipo() == ETipo.INTEGER &&(tipo2.getTipo() == ETipo.INTEGER ||tipo2.getTipo() == ETipo.NATURAL ))
+				return true;
+			
+			else if (tipo1.getTipo() == ETipo.FLOAT &&(tipo2.getTipo() == ETipo.INTEGER ||tipo2.getTipo() == ETipo.NATURAL ||tipo2.getTipo() == ETipo.FLOAT ))
+				return true;
+			
+			
+			else if (tipo1.getTipo() == ETipo.POINTER && tipo2.getTipo() == ETipo.POINTER )
+				return compatibles2(_ts.getTipo(tipo1.getId()), _ts.getTipo(tipo2.getId()), visitadas);
+			
+			else if (tipo1.getTipo()==ETipo.REF) return compatibles2(_ts.getTipo(tipo1.getId()), tipo2, visitadas);
+			else if (tipo2.getTipo()==ETipo.REF) return compatibles2(tipo1, _ts.getTipo(tipo2.getId()), visitadas);
+			
+			else if (tipo1.getTipo()==ETipo.ARRAY &&
+					 tipo1.getTipo()==ETipo.ARRAY &&
+					 tipo1.getNum_elems()==tipo2.getNum_elems())
+				return compatibles2(tipo1.getTbase(), tipo2.getTbase(), visitadas);
+			
+			else if (tipo1.getTipo()==ETipo.RECORD &&
+					 tipo2.getTipo()==ETipo.RECORD &&
+					 tipo1.getCampos().size() == tipo2.getCampos().size())
+			{
+				for (int i=0;i<tipo1.getCampos().size();i++){
+					if (!compatibles2(tipo1.getCampos().get(i).getTipo(), tipo2.getCampos().get(i).getTipo(), visitadas))
+						return false;
+				}
+				return true;
+			}
+			else if (tipo1.getTipo() == ETipo.PROC &&
+					tipo2.getTipo() == ETipo.PROC &&
+					tipo1.getParametros().size() == tipo2.getParametros().size()){
+					for (int i=0;i<tipo1.getParametros().size();i++){
+						if (!compatibles(tipo1.getParametros().get(i).getTipo(), tipo1.getParametros().get(i).getTipo()) ||
+							tipo2.getParametros().get(i).getModo() == EModo.VARIABLE && tipo1.getParametros().get(i).getModo() != EModo.VARIABLE)
+								return false;
+					}
+					return true;
+			}
+			else return false;
+		}
+	}
+	
+	
+	
+	
+	
 
 }
