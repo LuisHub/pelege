@@ -1,0 +1,7 @@
+integer x;
+integer y;
+&
+x:=200;
+y:=100;
+x:=x+y;
+out(x);
