@@ -79,6 +79,9 @@ public class AnalizadorSintactico {
 		parchea(0, _numNiveles + 1);
 		parchea(2, _numNiveles + _tamDatosLocales);
 		parchea(4,_etq);
+		if (_pend.size()>0)
+			throw new Error("quedan punteros con tipos no declarados");				
+
 		Sentencias();
 		_instrucciones.add(new InstruccionSTOP());
 		if (_tokenActual.getTipo()==TipoToken.EOF)
@@ -140,7 +143,7 @@ public Resp DecTipo()throws Error{
 	String id = _tokenActual.getLexema();										
 	emparejaToken(TipoToken.ID);		
 	emparejaToken(TipoToken.IGUAL);								
-	Tipo tipo = Tipo1();
+	Tipo tipo = Tipo1(true);
 	if (!errorEnDeclaracion(id, _nivel, tipo)){
 		Propiedades props = new Propiedades(EClase.TIPO, tipo, _nivel);
 		emparejaToken( TipoToken.SEPARADOR);
@@ -150,7 +153,7 @@ public Resp DecTipo()throws Error{
 		throw new Error("DecTipo: Identificador duplicado o referencia a un identificador que no es de clase TIPO. " + id + " " + _tokenActual.toString() + ")");				
 }
 	
-public Tipo Tipo1() throws Error{			
+public Tipo Tipo1(boolean estipo) throws Error{			
 	Tipo tipo = null;
 	if (_tokenActual.getTipo()==TipoToken.INTEGER){				
 		tipo = new Tipo(ETipo.INTEGER, 1);
@@ -182,25 +185,28 @@ public Tipo Tipo1() throws Error{
 	}
 	else if (_tokenActual.getTipo()==TipoToken.PUNTERO){
 		//TODO esto lo tendre que hacer con mas cabeza tendre que poner lo de pendiente aqui
-	//	emparejaToken( TipoToken.PUNTERO);
+		emparejaToken( TipoToken.PUNTERO);
 	//	tipo = new Tipo(ETipo.BOOLEAN, 1);
 	//	emparejaToken( TipoToken.BOOLEAN);
+		
+		
 	}
 	else if (_tokenActual.getTipo()==TipoToken.ID){
 		String id = _tokenActual.getLexema();
-		if (_ts.existeId(id) && _ts.getClase(id)!=EClase.TIPO)
-			//TODO && _ts.getClase(id)!=EClase.TIPO) no tiene que existir otro tipo =			
-			throw new Error("Tipo: " + id + " no es de clase TIPO ." + _tokenActual.toString() + ")");							
-		else{
-			
+		
+		
+		if (estipo)
+		{
 			emparejaToken( TipoToken.ID);
 			tipo = new Tipo(ETipo.REF, id, _ts.getTipo(id).getTam());
-			//TODO Solo en la declaracion de punteros noÇ?
-			//	if (!_ts.existeId(id))
-			//	_pend.add(id);
-		}
+		}else  if (_ts.existeId(id) && _ts.getClase(id)!=EClase.TIPO)
+					throw new Error("no ha sido declarado el tipo " + id + " declarelo antes que la variable ");							
+		else{
+			emparejaToken( TipoToken.ID);
+			tipo = new Tipo(ETipo.REF, id, _ts.getTipo(id).getTam());
 			
-								
+		}
+							
 	}
 	else if (_tokenActual.getTipo()==TipoToken.ARRAY){
 		emparejaToken( TipoToken.ARRAY);
@@ -209,7 +215,7 @@ public Tipo Tipo1() throws Error{
 		emparejaToken( TipoToken.NATURAL);
 		emparejaToken( TipoToken.CORCLA);
 		emparejaToken( TipoToken.OF);
-		Tipo tipo_aux = Tipo1();
+		Tipo tipo_aux = Tipo1(false);
 		if (!referenciaErronea(tipo_aux)){
 			tipo = new Tipo(ETipo.ARRAY, n, tipo_aux, tipo_aux.getTam() * n);
 		}
@@ -242,7 +248,7 @@ public Resp Campos() throws Error{
 }
 
 public Resp Campo() throws Error{
-	Tipo tipo = Tipo1();
+	Tipo tipo = Tipo1(false);
 	String id = _tokenActual.getLexema();
 	emparejaToken( TipoToken.ID);
 		
@@ -307,7 +313,7 @@ public void DecsVar() throws Error{
 
 //_tokenActual -> TokenId
 public Resp DecVar()throws Error{	
-	Tipo tipo = Tipo1();
+	Tipo tipo = Tipo1(false);
 	String id = _tokenActual.getLexema();		
 	emparejaToken(TipoToken.ID);
 	
@@ -417,7 +423,7 @@ public Vector<Parametro> RLFParams(Vector<Parametro> params1) throws Error{
 public Resp FParam() throws Error{
 	if (_tokenActual.getTipo()==TipoToken.VAR){
 		emparejaToken( TipoToken.VAR);
-		Tipo tipo = Tipo1();
+		Tipo tipo = Tipo1(false);
 		String id = _tokenActual.getLexema();
 		emparejaToken( TipoToken.ID);
 		Propiedades props = new Propiedades(EClase.PVAR, _dir, tipo, _nivel);
@@ -428,7 +434,7 @@ public Resp FParam() throws Error{
 	else 
 	{
 		
-		Tipo tipo = Tipo1();
+		Tipo tipo = Tipo1(false);
 		String id = _tokenActual.getLexema();
 		emparejaToken( TipoToken.ID);
 		Propiedades props = new Propiedades(EClase.VAR, _dir,  tipo, _nivel);
