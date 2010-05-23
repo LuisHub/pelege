@@ -1,7 +1,7 @@
 #program veinte;
 
-x:integer;
-y:IntEgEr;
+integer x;
+IntEgEr y;
 &
 in(x);
 y:=1+X+4;

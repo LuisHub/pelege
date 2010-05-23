@@ -1,7 +1,7 @@
 #program Diecisiete;
  
-x:integer;
-y:boolean;
+integer x;
+boolean y;
 &
 y:=1;
 x:=true;

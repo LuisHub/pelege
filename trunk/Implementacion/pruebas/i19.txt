@@ -1,6 +1,6 @@
 #program diecinueve;
 
-a23:nada;
+nada a23;
 &
 a23:=23
 

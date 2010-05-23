@@ -1,8 +1,8 @@
 #program tres;
 # esta no funciona porque boolean debe ser con minuscula 
-x:boolean;
-y:boolean;
-z:BOOLEAN;
+boolean x;
+boolean x;
+BOOLEAN x;
 &
 in(y);
 in(z);

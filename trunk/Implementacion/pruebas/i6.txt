@@ -1,6 +1,6 @@
 #program seis;
 
-x:integer;
+integer x;
 &
 x:=(300/7) % 7;
 

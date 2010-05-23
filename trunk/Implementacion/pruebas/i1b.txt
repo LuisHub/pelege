@@ -1,6 +1,6 @@
 #program unob;
 
-	x:integer;
+	integer x;
 &
 	x:=1;
 	out(x);

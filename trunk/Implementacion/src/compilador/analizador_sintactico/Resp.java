@@ -9,7 +9,7 @@ import compilador.tabla.Propiedades;
 import compilador.tabla.Tipo;
 
 import vm.instruccion.Instruccion;
-import vm.instruccion.TipoInstruccion;
+
 
 /* Clase que representa la respuesta del métodos que devuelven varios parámetros. Es necesaria 
  * ya que no existe en Java el paso de parámetros por referencia.

@@ -1,10 +1,10 @@
 # ejemplo luis
 
-valor: float;
-valor2: float;
-valor3: float;
-valor4: float;
-valor5:integer;
+float valor;
+float valor2;
+float valor3;
+float valor4;
+integer valor5;
 &
 valor:= 2.5e8;
 valor2:= 2.65E5;

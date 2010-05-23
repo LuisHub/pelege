@@ -1,6 +1,6 @@
 #program cinco;
 # esta falla por no declarar y, bien
-x:integer;
+integer x;
 &
 y:=4/2;
 

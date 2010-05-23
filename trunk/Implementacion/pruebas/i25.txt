@@ -1,9 +1,9 @@
 # ejemplo luis
 
-valor: float;
-valor2: float;
-valor3: float;
-valor4: float;
+float valor;
+float valor2;
+float valor3;
+float valor4;
 &
 valor:= 2.5e8;
 valor2:= 2.65E5;
