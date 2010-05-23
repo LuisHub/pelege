@@ -356,6 +356,7 @@ public Resp DecProc() throws Error{
 	if (_numNiveles < _nivel)
 		_numNiveles = _nivel;
 	_dir=0;
+	_tamDatosLocales=0;
 	Vector<Parametro> params = FParams();
 	
 		

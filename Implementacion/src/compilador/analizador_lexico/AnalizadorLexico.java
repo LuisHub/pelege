@@ -108,6 +108,8 @@ public class AnalizadorLexico {
 				else if (actual==';'){
 					estado=7;
 					buffer+=actual;
+					tok= new Token(numLinea,numCol,TipoToken.SEPARADOR);
+					creado=true;
 					actual=siguienteCaracter();
 				}
 				else if (actual=='%'){
@@ -163,7 +165,7 @@ public class AnalizadorLexico {
 				else if (actual==','){
 					//estado=37;
 					//buffer+=actual;
-					tok= new Token(numLinea,numCol,TipoToken.SEPARADOR);
+					tok= new Token(numLinea,numCol,TipoToken.COMA);
 					creado=true;
 					actual=siguienteCaracter();
 				}
