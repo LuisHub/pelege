@@ -108,6 +108,7 @@ public class AnalizadorSintactico {
 			_tamDatosLocales = _dir;
 			} else if (_tokenActual.getTipo() == TipoToken.PROCEDURE) {
 				DecsProc();
+				_dir=_tamDatosLocales;
 			}
 			
 			Declaraciones();
@@ -922,6 +923,7 @@ public void RDecs() throws Error {
 		boolean parh=false;
 		Tipo tipo2 = Exp(parh).getTipo();
 		emparejaToken(TipoToken.SEPARADOR);
+		_instrucciones.add(new InstruccionDESAPILAIND());
 		
 		//TODO fallaasig() es lo que tenia antes
 		//TODO tengo que hacerme la compatibilidad
