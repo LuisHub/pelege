@@ -12,6 +12,10 @@ import compilador.tokens.*;
 public class AnalizadorSintactico {
 	// esto es una prueba para subir contenido al repositorio willy
 
+	public Vector<Instruccion> get_instrucciones() {
+		return _instrucciones;
+	}
+
 	private final int valorIndefinido=Integer.MIN_VALUE;
 	public TablaSimbolos _ts;
 	public AnalizadorLexico _lexico;
@@ -486,7 +490,7 @@ public void ListaSents() throws Error{
 }
 
 
-//TODO	
+	
 public void inicio(int numNiveles, int tamDatosLocales){
 		
 		_instrucciones.add(new InstruccionAPILA(numNiveles+1));
@@ -541,7 +545,7 @@ public void apilaRet(int ret){
 	_instrucciones.add(new InstruccionDESAPILAIND());
 }
 
-public void accesoVar(RegistroTabla infoID){
+	public void accesoVar(RegistroTabla infoID){
 	_instrucciones.add(new InstruccionAPILADIR(1+infoID.getNivel()));
 	_instrucciones.add(new InstruccionAPILA(infoID.getDir()));
 	_instrucciones.add(new InstruccionSUMA());
@@ -637,7 +641,7 @@ public Tipo tipoDeID(String id) throws Error{
 }
 
 public Tipo tipoDeTBase(Tipo tipo1, Tipo tipo2) throws Error{
-	if (tipo1.getTipo() == ETipo.ARRAY && tipo2.getTipo() == ETipo.INTEGER)
+	if (tipo1.getTipo() == ETipo.ARRAY && tipo2.getTipo() == ETipo.NATURAL)
 		return referencia(tipo1.getTbase());
 	else
 		throw new Error("tipoDeTBase: Identificadores para array no del tipo ARRAY e INTEGER. " + _tokenActual.toString());
@@ -808,7 +812,8 @@ public void RDecs() throws Error {
 			throw new Error("InstrWhile: El tipo de la expresión no es BOOLEAN.");	
 	}
 
-	public void InstrId() throws Error {
+
+	private void InstrId() throws Error {
 		Token tokenid= new Token(_tokenActual.getNumLinea(),_tokenActual.getNumColumna(),_tokenActual.getLexema(),_tokenActual.getTipo());
 		emparejaToken(TipoToken.ID);
 		if (_tokenActual.getTipo()==TipoToken.ASIG ||
@@ -822,8 +827,13 @@ public void RDecs() throws Error {
 	
 	public void InstrCall(Token tokenid) throws Error{
 		int etq2;
-		String id = tokenid.getLexema();
+		String id;
+		if (tokenid!=null)
+		id = tokenid.getLexema();
+		else {
+			id=this._tokenActual.getLexema();
 		emparejaToken(TipoToken.ID);
+		}
 		if (_ts.existeId(id) && _ts.getClase(id) == EClase.PROC){
 			apilaRet(valorIndefinido);
 			etq2 = _etq + 3;		
@@ -869,9 +879,9 @@ public void RDecs() throws Error {
 			|| !compatibles(params.get(0).getTipo(), resp.getTipo()))
 			throw new Error("LRParams: ERROR");
 		else
-			return RLRParams(params, 1);
+			
 			*/
-		return 0;
+		return RLRParams(params, 1);
 		}
 
 	
@@ -913,7 +923,7 @@ public void RDecs() throws Error {
 		Tipo tipo2 = Exp(parh).getTipo();
 		emparejaToken(TipoToken.SEPARADOR);
 		
-		//fallaasig() es lo que tenia antes
+		//TODO fallaasig() es lo que tenia antes
 		//TODO tengo que hacerme la compatibilidad
 		/*
 		if (compatibles(tipo1,tipo2)){
@@ -997,8 +1007,8 @@ public void RDecs() throws Error {
 
 
 	public Resp RExp(Tipo tipo1, EModo modo1) throws Error {
-		Resp tipo;
-		Resp tipo2;
+		Resp resp1;
+		Resp resp2;
 		if (_tokenActual.getTipo() == TipoToken.MENOR
 				|| _tokenActual.getTipo() == TipoToken.MAYOR
 				|| _tokenActual.getTipo() == TipoToken.IGUAL
@@ -1006,17 +1016,21 @@ public void RDecs() throws Error {
 				|| _tokenActual.getTipo() == TipoToken.MENORIGUAL
 				|| _tokenActual.getTipo() == TipoToken.MAYORIGUAL) {
 
-			//TODO resp lo tengo que asociar con algo
+			
 			Resp resp = OpComp();
-			tipo2 = ExpSimple(false);
+			resp2 =ExpSimple(false) ;
+			
+		
 
-			tipo= new Resp(tipoDeExpComp(tipo1, tipo2.getTipo()), EModo.VALOR);;
+			resp1= new Resp(tipoDeExpComp(tipo1, resp2.getTipo()), EModo.VALOR);;
 
 			_instrucciones.add(resp.getCodigo());
+			this._etq=this._etq+1;
+			
 		} else {
-			tipo = new Resp(tipo1, modo1);
+			resp1 = new Resp(tipo1, modo1);
 		}
-		return tipo;
+		return resp1;
 	}
 
 	public Resp ExpSimple(boolean parhin) throws Error{
@@ -1029,33 +1043,35 @@ public void RDecs() throws Error {
 
 
 	public Resp RExpSimple(Tipo tipo1, EModo modo1) throws Error {
-		Resp tipo;
-		Resp tipo2;
+		Resp resp1;
+		Resp resp2;
+		Tipo tipofinal;
 		if (_tokenActual.getTipo() == TipoToken.SUMA
 				|| _tokenActual.getTipo() == TipoToken.RESTA
 				|| _tokenActual.getTipo() == TipoToken.OR) {
 
 			boolean parche=false;
-			//TODO resp lo tengo que asociar con algo
+			
 			Resp resp = OpAd();
-			tipo2 = Term(parche);
-			//TODO ver el tipo final que sale
-			//tipo2 = tipoDeExpBin(resp.getTipo(), tipo1, tipo2);
+			resp2 = Term(parche);
+			
+			tipofinal = tipoDeExpBin(resp.getTipo(), tipo1, resp2.getTipo());
 
 			_instrucciones.add(resp.getCodigo());
+			this._etq=this._etq+1;
 
-			tipo = RExpSimple(tipo2.getTipo(),  tipo2.getModo());
+			resp1 = RExpSimple(tipofinal,  EModo.VALOR);
 
 		} else {
-			tipo = new Resp(tipo1, modo1);
+			resp1 = new Resp(tipo1, modo1);
 		}
-		return tipo;
+		return resp1;
 	}
 	
 
 
 	public Resp Term(boolean parhin) throws Error {
-		//TODO tengo que hacer el desplazamiento
+		
 		Resp resp;
 		resp = despl(parhin);
 		resp = RTerm(resp.getTipo(),resp.getModo());
@@ -1063,26 +1079,26 @@ public void RDecs() throws Error {
 	}
 
 	public Resp RTerm(Tipo tipo1, EModo modo1) throws Error {
-		Resp tipo;
-		Resp tipo2;
+		Resp resp1;
+		Resp resp2;
 		if (_tokenActual.getTipo() == TipoToken.MULT
 				|| _tokenActual.getTipo() == TipoToken.DIV
 				|| _tokenActual.getTipo() == TipoToken.AND) {
 
 			Resp resp = OpMul();
 			boolean parhc=false;
-			tipo2 = despl(parhc);
-			Tipo tipofinal=	tipoDeExpBin(resp.getTipo(),tipo1, tipo2.getTipo());
-			tipo = new Resp (tipofinal, EModo.VALOR);
+			resp2 = despl(parhc);
+			Tipo tipofinal=	tipoDeExpBin(resp.getTipo(),tipo1, resp2.getTipo());
+			resp1 = new Resp (tipofinal, EModo.VALOR);
 
 			_instrucciones.add(resp.getCodigo());
 			_etq++;
 
-			tipo =RTerm(tipo.getTipo(), tipo.getModo());
+			resp1 =RTerm(resp1.getTipo(), resp1.getModo());
 		} else {
-			tipo = new Resp(tipo1, modo1);
+			resp1 = new Resp(tipo1, modo1);
 		}
-		return tipo;
+		return resp1;
 	}
 
 	// voy a poner el modulo y el desplazamiento en la misma produccion
@@ -1092,9 +1108,6 @@ public void RDecs() throws Error {
 				
 		Resp tipofinal;
 		Resp tipo2;
-		// tipo2= this.OpcionA();
-		// tipo= Rdespl(tipo2);
-		
 		tipo2 = Fact(parchin);
 		tipofinal = Rdespl(tipo2.getTipo(),tipo2.getModo());
 		return tipofinal;
@@ -1102,15 +1115,15 @@ public void RDecs() throws Error {
 	}
 
 	public Resp Rdespl(Tipo tipo1, EModo modo1) throws Error {
-
 		Resp respfinal;
 		Resp tipo2;
 		Tipo tipo;
-
+		//TODO porcentaje no iba en otra  funcion?????
 		if (_tokenActual.getTipo() == TipoToken.DESPDER
 				|| _tokenActual.getTipo() == TipoToken.DESPIZQ
 				|| _tokenActual.getTipo() == TipoToken.PORCEN) {
 
+			//TODO mirar que no tenga operacion de desplazamiento
 			Resp aux = opdesp();
 			// tipo2 = OpcionA();
 			boolean parch=false;
@@ -1119,22 +1132,18 @@ public void RDecs() throws Error {
 
 			// _instrucciones.add(aux.getCodigo());
 
-
-			respfinal = Rdespl(tipo,modo1);
-
+			respfinal = Rdespl(tipo,EModo.VALOR);
 			// creo que la recursion a derechas es solo poner instrucion detras
 			// de esto
 			_instrucciones.add(aux.getCodigo());
+			this._etq=this._etq+1;
 		} else {
 			respfinal = new Resp(tipo1, modo1);
 		}
 		return respfinal;
 	}
 
-
-
 	private Resp opdesp() throws Error {
-
 
 		Instruccion codigo = null;
 		Tipo tipo = null;
@@ -1146,6 +1155,10 @@ public void RDecs() throws Error {
 			codigo = new InstruccionDESPD();
 			tipo =new Tipo(ETipo.DESP);
 			emparejaToken(TipoToken.DESPDER);
+		} else if (_tokenActual.getTipo() == TipoToken.PORCEN) { 
+			codigo = new InstruccionMOD();
+			tipo =new Tipo(ETipo.NUMERICA);
+			emparejaToken(TipoToken.PORCEN);
 		}
 
 		return new Resp(codigo, tipo);
@@ -1167,17 +1180,9 @@ public void RDecs() throws Error {
 			Resp opUnario = OpUnario();
 			parh=false;
 			fact=Fact(parh);
-			tipoModo = new Resp(tipoDeFact(opUnario.getTipo(),fact.getTipo()), EModo.VALOR);						
+			tipoModo = new Resp(tipoDeFact(opUnario.getTipo(),fact.getTipo()),EModo.VALOR);						
 			_instrucciones.add(opUnario.getCodigo());
 			_etq++;	
-			//TODO esto lo tengo que ver bien xq no se bien como va
-			/*
-			
-			OpResp resp = OpUnario();
-			tipo1 = Fact();
-			tipo = tipoDeFact(resp.getTipo(), tipo1);
-			_instrucciones.add(resp.getCodigo());
-			*/
 			
 		} else {
 			tipoModo = Atomo(parhin);
@@ -1191,19 +1196,19 @@ public void RDecs() throws Error {
 	
 
 	public Resp Atomo(boolean parhin) throws Error {
-		Resp tipo = null;
+		Resp resp = null;
 
 		if (_tokenActual.getTipo() == TipoToken.INTEGER) {
 			_instrucciones.add(new InstruccionAPILA(Double
 					.parseDouble(_tokenActual.getLexema())));
 			
-			tipo = new Resp(new Tipo(ETipo.INTEGER), EModo.VALOR);
+			resp = new Resp(new Tipo(ETipo.INTEGER), EModo.VALOR);
 			_etq++;
 			emparejaToken(TipoToken.INTEGER);
 		} else if (_tokenActual.getTipo() == TipoToken.NATURAL) {
 			_instrucciones.add(new InstruccionAPILA(Double
 					.parseDouble(_tokenActual.getLexema())));
-			tipo = new Resp(new Tipo(ETipo.NATURAL), EModo.VALOR);
+			resp = new Resp(new Tipo(ETipo.NATURAL), EModo.VALOR);
 			_etq++;
 			emparejaToken(TipoToken.NATURAL);
 		} else if (_tokenActual.getTipo() == TipoToken.FLOAT) {
@@ -1230,27 +1235,21 @@ public void RDecs() throws Error {
 				_instrucciones.add(new InstruccionAPILA(numEnter3));
 
 			}
-			tipo = new Resp(new Tipo(ETipo.FLOAT), EModo.VALOR);
+			resp = new Resp(new Tipo(ETipo.FLOAT), EModo.VALOR);
 			emparejaToken(TipoToken.FLOAT);
 			_etq++;
 		} else if (_tokenActual.getTipo() == TipoToken.CHARACTER) {
 			_instrucciones.add(new InstruccionAPILA((double) _tokenActual
 					.getLexema().charAt(0)));
 			_etq++;
-			tipo = tipo = new Resp(new Tipo(ETipo.CHAR), EModo.VALOR);
+			 resp = new Resp(new Tipo(ETipo.CHAR), EModo.VALOR);
 			emparejaToken(TipoToken.CHARACTER);
 		} 
 		
 		else if (_tokenActual.getTipo() == TipoToken.ID) {
-			/*
-			_instrucciones.add(new InstruccionAPILADIR(_ts.dameDir(_tokenActual
-					.getLexema())));
-			tipo = _ts.tipoDe(_tokenActual.getLexema());
-			emparejaToken(TipoToken.ID);
-			*/
-			
-			tipo = new Resp(Mem(null), EModo.VARIABLE);
-			//TODO coppatibilidad
+
+			resp = new Resp(Mem(null), EModo.VARIABLE);
+			//TODO yo creo que aqui no hace falta nada parchin aqui lo usa
 			/*
 			if ((compatibles(tipo.getTipo(), new Tipo(ETipo.INTEGER)) || 
 				compatibles(tipo.getTipo(), new Tipo(ETipo.BOOLEAN)))&& !parhin){
@@ -1259,44 +1258,40 @@ public void RDecs() throws Error {
 				
 			}	
 			*/
-			
-			
-			
 		} else if (_tokenActual.getTipo() == TipoToken.TRUE) {
 			_instrucciones.add(new InstruccionAPILA(1));
-			tipo = new Resp(new Tipo(ETipo.BOOLEAN), EModo.VALOR);
+			resp = new Resp(new Tipo(ETipo.BOOLEAN), EModo.VALOR);
 			emparejaToken(TipoToken.TRUE);
 			_etq++;
 		} else if (_tokenActual.getTipo() == TipoToken.FALSE) {
 			_instrucciones.add(new InstruccionAPILA(0));
-			tipo = new Resp(new Tipo(ETipo.BOOLEAN), EModo.VALOR);
+			resp = new Resp(new Tipo(ETipo.BOOLEAN), EModo.VALOR);
 			emparejaToken(TipoToken.FALSE);
 			_etq++;
 		} else if (_tokenActual.getTipo() == TipoToken.PARAP) {
 			emparejaToken(TipoToken.PARAP);
-			tipo = Exp(parhin);
+			resp = Exp(parhin);
 			emparejaToken(TipoToken.PARCLA);
 			
 		} else if (_tokenActual.getTipo() == TipoToken.VALORABSO) {
 			emparejaToken(TipoToken.VALORABSO);
-			tipo = Exp(parhin);
-			if ((tipo.getTipo().getTipo() != ETipo.FLOAT)
-					|| (tipo.getTipo().getTipo() != ETipo.INTEGER)
-					|| (tipo.getTipo().getTipo() != ETipo.NATURAL))
-			//	tipo = TipoInstruccion.ERROR;
-				tipo=new Resp(new Tipo(ETipo.ERR), EModo.VALOR);
+			resp = Exp(parhin);
+			if ((resp.getTipo().getTipo() != ETipo.FLOAT)
+					|| (resp.getTipo().getTipo() != ETipo.INTEGER)
+					|| (resp.getTipo().getTipo() != ETipo.NATURAL))
+				resp=new Resp(new Tipo(ETipo.ERR), EModo.VALOR);
 			emparejaToken(TipoToken.VALORABSO);
 		} 
 		
 		
 		else{
-			tipo=new Resp(new Tipo(ETipo.ERR), EModo.VALOR);
+			resp=new Resp(new Tipo(ETipo.ERR), EModo.VALOR);
 		}		
 
 		
 		
 
-		return tipo;
+		return resp;
 	}
 
 	public Resp OpAd() throws Error {
@@ -1323,7 +1318,7 @@ public void RDecs() throws Error {
 		
 
 	}
-//TODO como esta
+
 	public Resp OpMul() throws Error {
 		Instruccion codigo = null;
 		Tipo tipo = null;
@@ -1339,13 +1334,14 @@ public void RDecs() throws Error {
 			codigo = new InstruccionAND();
 			tipo =new Tipo(ETipo.BOOLEAN);
 			emparejaToken(TipoToken.AND);
-		} else if (_tokenActual.getTipo()==TipoToken.PORCEN){				
+		}//TODO esto va a ir fuera 
+		else if (_tokenActual.getTipo()==TipoToken.PORCEN){				
 			codigo = new InstruccionMOD();
 			tipo = new Tipo(ETipo.NUMERICA);
 			emparejaToken(TipoToken.PORCEN);
 		}else
 			throw new Error(
-					"OpMul: Se esperaba tokenMULT, tokenDIV, tokenAND o tokenPORCEN y no "
+					"OpMul: Se esperaba tokenMULT, tokenDIV o tokenAND y no "
 							+ _tokenActual.toString());
 
 		return new Resp(codigo, tipo);
@@ -1394,7 +1390,7 @@ public void RDecs() throws Error {
 		Tipo tipo = null;
 		if (_tokenActual.getTipo() == TipoToken.RESTA) {
 			codigo = new InstruccionNEG();
-			tipo = new Tipo(ETipo.NATURAL);
+			tipo = new Tipo(ETipo.NUMERICA);
 			emparejaToken(TipoToken.RESTA);
 		} else if (_tokenActual.getTipo() == TipoToken.NOT) {
 			codigo = new InstruccionNOT();
@@ -1444,12 +1440,14 @@ public void RDecs() throws Error {
 		if ((tOperador.getTipo() == ETipo.INTEGER
 				|| tOperador.getTipo() == ETipo.NATURAL
 				|| tOperador.getTipo() == ETipo.NUMERICA
-				|| tOperador.getTipo() == ETipo.CHAR || tOperador.getTipo() == ETipo.FLOAT)
+				|| tOperador.getTipo() == ETipo.CHAR 
+				|| tOperador.getTipo() == ETipo.FLOAT)
 				&& (tOperando.getTipo() == ETipo.BOOLEAN))
 			return new Tipo(ETipo.ERR);
 		else if ((tOperador.getTipo() == ETipo.INTEGER
 				|| tOperador.getTipo() == ETipo.NATURAL
-				|| tOperador.getTipo() == ETipo.NATURAL || tOperador.getTipo() == ETipo.NUMERICA)
+				|| tOperador.getTipo() == ETipo.NATURAL 
+				|| tOperador.getTipo() == ETipo.NUMERICA)
 				&& tOperando.getTipo() == ETipo.CHAR)// casting
 			return new Tipo(ETipo.ERR);
 		/*
@@ -1457,7 +1455,8 @@ public void RDecs() throws Error {
 		 * tOperando.tipo == boolean))//valor abs return <tipo:’err’>
 		 */
 		else if (tOperador.getTipo() == ETipo.CHAR
-				&& (tOperando.getTipo() == ETipo.INTEGER || tOperando.getTipo() == ETipo.FLOAT))
+				&& (tOperando.getTipo() == ETipo.INTEGER 
+						|| tOperando.getTipo() == ETipo.FLOAT))
 			return new Tipo(ETipo.ERR);
 		else if (tOperador.getTipo() == ETipo.NUMERICA
 				&& tOperando.getTipo() == ETipo.NATURAL)
@@ -1481,7 +1480,8 @@ public void RDecs() throws Error {
 			return new Tipo(ETipo.ERR);
 		else {
 			if (tipoInstruccion.getTipo() == ETipo.NUMERICA) {
-				if ((tOperando1.getTipo() != ETipo.BOOLEAN)	&& (tOperando2.getTipo() != ETipo.BOOLEAN)) {
+				if ((tOperando1.getTipo() != ETipo.BOOLEAN)	
+						&& (tOperando2.getTipo() != ETipo.BOOLEAN)) {
 					if ((tOperando1.getTipo() == ETipo.FLOAT)
 							|| (tOperando2.getTipo() == ETipo.FLOAT))
 						return new Tipo(ETipo.FLOAT);
