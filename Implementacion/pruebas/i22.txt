@@ -1,11 +1,11 @@
 #program veinte;
-a:integer;
-b:integer;
-c:integer;
-d:boolean;
-e:boolean;
-f:boolean;
-x:integer;
+integer a;
+integer b;
+integer c;
+boolean d;
+boolean e;
+boolean f;
+integer x;
 &
 x:=(nat)(300/7) % 7;
 x:=4%2;

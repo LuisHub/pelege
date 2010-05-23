@@ -1,9 +1,9 @@
 #program Cartorcee;
 
-x11y:integer;
-xx12: boolean;
-xx13 : integer;
-xx14 :boolean;
+interger x11y;
+boolean xx12;
+interger xx13;
+boolean xx14;
 &
 in(x11y);
 xx13 := 1+x11y;

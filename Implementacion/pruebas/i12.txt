@@ -1,8 +1,8 @@
 #program DoCE;
 #falla por la asignacion, bien
-xx12: boolean;
-xx13 : integer;
-xx14 :boolean;
+boolean xx12;
+integer xx13;
+boolean xx14;
 &
 xx12 : = 1+3 ;
 xx13: = true;

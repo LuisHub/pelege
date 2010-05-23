@@ -1,7 +1,7 @@
 #progam dos;
 
-x:integer;
-y:boolean;
+integer x;
+boolean y;
 &
 x:=1;
 y:=1;

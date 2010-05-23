@@ -1,10 +1,10 @@
 #program Dieciohco;
 
 abcdefghijklmnopqrstuvwxyz: integer;
-x:integer;
-y:boolean;
-z:boolean;
-aa:boolean;
+integer x;
+boolean y;
+boolean z;
+boolean aa;
 &
 abcdefghijklmnopqrstuvwxyz := y; 
 y:=1;

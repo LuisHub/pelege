@@ -1,8 +1,7 @@
-a:natural;
-b:natural;
-c:natural;
-d:natural;
-e:natural;
+natural a;
+natural b;
+natural c;
+natural d;
 #desplazamiento
 &
 a:=2;

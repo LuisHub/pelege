@@ -1,9 +1,8 @@
 #program 
 #unob
 
-x
-:
 integer
+x
 ;
 &
 x

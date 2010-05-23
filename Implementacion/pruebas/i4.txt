@@ -1,5 +1,5 @@
 #program cuatro;
-x:integer;
+integer x;
 &
 x:=2*3 % 12;
 

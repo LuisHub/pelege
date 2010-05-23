@@ -1,7 +1,7 @@
 #program Diecisies;
 
-x:integer;
-y:boolean;
+integer x;
+boolean y;
 &
 x:=true;
 y:=1;

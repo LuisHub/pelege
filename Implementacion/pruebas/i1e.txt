@@ -1,1 +1,1 @@
- x:	integer;	& x			:=1;out(			x);	
+integer x;	& x			:=1;out(			x);	

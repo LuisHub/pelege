@@ -1,10 +1,10 @@
 # Programa de ejemplo
-cantidad: float;
-euros: integer;
-centimos: float;
-valor2: float;
-valor3 : natural;
-valor4 : natural;
+float cantidad;
+integer euros;
+float centimos;
+float valor2;
+natural valor3;
+natural valor4;
 &
 centimos:=valor3 % valor4;
 valor2:= 2.65E5;
