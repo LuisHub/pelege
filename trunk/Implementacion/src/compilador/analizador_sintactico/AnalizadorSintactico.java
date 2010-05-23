@@ -754,14 +754,14 @@ public void RDecs() throws Error {
 			InstrLect();
 		else if (_tokenActual.getTipo()==TipoToken.WRITE)		
 			InstrEsc();
-		/*
+		
 		else if (_tokenActual.getTipo()==TipoToken.IF)		
 			InstrIf();
 		else if (_tokenActual.getTipo()==TipoToken.WHILE)		
 			InstrWhile();
 		else if (_tokenActual.getTipo()==TipoToken.FOR)		
 			InstrFor();
-		else if (_tokenActual.getTipo()==TipoToken.NEW)		
+		/*else if (_tokenActual.getTipo()==TipoToken.NEW)		
 			InstrNew();
 		else if (_tokenActual.getTipo()==TipoToken.DISPOSE)		
 			InstrDis();
@@ -772,7 +772,8 @@ public void RDecs() throws Error {
 							+ _tokenActual.toString());
 	}
 
-	public void InstrIf() throws Error{		
+	public void InstrIf() throws Error{
+		//REVISAR CIRCUITO CORTO
 		emparejaToken(TipoToken.IF);
 		boolean parh=false;
 		Tipo tipo = Exp(parh).getTipo();
@@ -781,7 +782,7 @@ public void RDecs() throws Error {
 			int etq1 = _etq;	
 			_instrucciones.add(new InstruccionIRF(valorIndefinido));
 			_etq++;
-			Instr();
+			InsComp();
 			int etq2 = _etq;
 			_instrucciones.add(new InstruccionIRA(valorIndefinido));
 			_etq++;
@@ -796,21 +797,22 @@ public void RDecs() throws Error {
 	public void PElse() throws Error{
 		if (_tokenActual.getTipo()==TipoToken.ELSE){
 			emparejaToken(TipoToken.ELSE);
-			Instr();	
+			InsComp();	
 		}
 	}
 	
-	public void InstrWhile() throws Error{		
+	public void InstrWhile() throws Error{
+		//REVISAR CIRCUITO CORTO
 		emparejaToken(TipoToken.WHILE);
 		int etq1 = _etq;
 		boolean parh=false;
 		Tipo tipo = Exp(parh).getTipo();
 		if (tipo.getTipo() == ETipo.BOOLEAN){
-			//emparejaToken(EToken.DO);			
+			emparejaToken(TipoToken.DO);			
 			_instrucciones.add(new InstruccionIRF(valorIndefinido));
 			int etq2 = _etq;
 			_etq++;
-			Instr();			
+			InsComp();			
 			_instrucciones.add(new InstruccionIRA(etq1));
 			_etq++;
 			parchea(etq2, _etq);
@@ -818,9 +820,33 @@ public void RDecs() throws Error {
 		else
 			throw new Error("InstrWhile: El tipo de la expresión no es BOOLEAN.");	
 	}
+	
+	public void InstrFor() throws Error{
+		//REVISAR CIRCUITO CORTO
+		emparejaToken(TipoToken.FOR);
+		//..
+		//..
+		//Exp0 y Exp1
+		//if (tipo.getTipo() == ETipo.BOOLEAN){
+		emparejaToken(TipoToken.DO);
+		
+		//}
+		//else
+			//throw new Error("InstrFor: El tipo de la expresión no es BOOLEAN.");
+	}
 
+	public void InsComp() throws Error{
+		if (_tokenActual.getTipo()==TipoToken.CORAP)
+		{
+			emparejaToken(TipoToken.CORAP);
+			Sentencias();
+			emparejaToken(TipoToken.CORCLA);
+		}
+		else
+			Instr();
+	}
 
-	private void InstrId() throws Error {
+	public void InstrId() throws Error {
 		Token tokenid= new Token(_tokenActual.getNumLinea(),_tokenActual.getNumColumna(),_tokenActual.getLexema(),_tokenActual.getTipo());
 		emparejaToken(TipoToken.ID);
 		if (_tokenActual.getTipo()==TipoToken.ASIG ||

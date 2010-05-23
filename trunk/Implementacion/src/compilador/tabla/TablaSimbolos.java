@@ -56,7 +56,7 @@ public class TablaSimbolos {
 		if (!tabla.containsKey(id) && tsPadre!=null)
 			return tsPadre.getTipo(id);
 		else
-			return tabla.get(id).getTipo();	
+				return tabla.get(id).getTipo();
 	}
 	
 	public int getNivel(String id){
