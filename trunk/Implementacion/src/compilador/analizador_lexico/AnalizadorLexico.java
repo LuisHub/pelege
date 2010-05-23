@@ -161,8 +161,10 @@ public class AnalizadorLexico {
 					actual=siguienteCaracter();
 				}
 				else if (actual==','){
-					estado=37;
-					buffer+=actual;
+					//estado=37;
+					//buffer+=actual;
+					tok= new Token(numLinea,numCol,TipoToken.SEPARADOR);
+					creado=true;
 					actual=siguienteCaracter();
 				}
 				else if (actual=='{'){
@@ -170,6 +172,7 @@ public class AnalizadorLexico {
 					buffer+=actual;
 					actual=siguienteCaracter();
 				}
+
 				else if (actual=='}'){
 					estado=39;
 					buffer+=actual;
