@@ -1081,7 +1081,7 @@ public void RDecs() throws Error {
 		Tipo tipofinal;
 		if (_tokenActual.getTipo() == TipoToken.SUMA
 				|| _tokenActual.getTipo() == TipoToken.RESTA
-				|| _tokenActual.getTipo() == TipoToken.OR) {
+				/*|| _tokenActual.getTipo() == TipoToken.OR*/) {
 
 			boolean parche=false;
 			
@@ -1095,7 +1095,18 @@ public void RDecs() throws Error {
 
 			resp1 = RExpSimple(tipofinal,  EModo.VALOR);
 
-		} else {
+		} 
+		else if (_tokenActual.getTipo() == TipoToken.OR)
+		{
+			boolean parche=false;//revisar!
+			Resp resp = OpAd();
+			resp2 = Term(parche);
+			//--cortar aqui el ccorto
+			tipofinal = tipoDeExpBin(resp.getTipo(), tipo1, resp2.getTipo());
+			
+			
+		}
+		else {
 			resp1 = new Resp(tipo1, modo1);
 		}
 		return resp1;
@@ -1176,7 +1187,7 @@ public void RDecs() throws Error {
 		return respfinal;
 	}
 
-	private Resp opdesp() throws Error {
+	public Resp opdesp() throws Error {
 
 		Instruccion codigo = null;
 		Tipo tipo =new Tipo(ETipo.ERR); ;
@@ -1335,6 +1346,7 @@ public void RDecs() throws Error {
 			codigo = new InstruccionRESTA();
 			tipo =new Tipo(ETipo.NUMERICA);
 			emparejaToken(TipoToken.RESTA);
+			//vamos a dejar el OR aquí
 		} else if (_tokenActual.getTipo() == TipoToken.OR) {
 			codigo = new InstruccionOR();
 			tipo =new Tipo(ETipo.BOOLEAN);
@@ -1360,6 +1372,7 @@ public void RDecs() throws Error {
 			codigo = new InstruccionDIV();
 			tipo =new Tipo(ETipo.NUMERICA);
 			emparejaToken(TipoToken.DIV);
+			//vamos a dejar el AND aquí
 		} else if (_tokenActual.getTipo() == TipoToken.AND) {
 			codigo = new InstruccionAND();
 			tipo =new Tipo(ETipo.BOOLEAN);
@@ -1371,7 +1384,7 @@ public void RDecs() throws Error {
 			emparejaToken(TipoToken.PORCEN);
 		}else
 			throw new Error(
-					"OpMul: Se esperaba tokenMULT, tokenDIV o tokenAND y no "
+					"OpMul: Se esperaba tokenMULT, tokenDIV, tokenAND o tokenPORCEN y no "
 							+ _tokenActual.toString());
 
 		return new Resp(codigo, tipo);
