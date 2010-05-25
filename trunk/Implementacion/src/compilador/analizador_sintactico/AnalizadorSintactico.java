@@ -959,9 +959,19 @@ public void RDecs() throws Error {
 		//TODO fallaasig() es lo que tenia antes
 		//TODO tengo que hacerme la compatibilidad
 		
+		//WILLY Aquí mete MUEVES en vez de DESAPILAS!! Hay que añadir tipos de compatibilidad, no se si los tipos de operadores tb ¿?
+		
 		if (compatibles(tipo1,tipo2)){
 			if (compatibles(tipo1, new Tipo(ETipo.INTEGER)) || 
-				compatibles(tipo1, new Tipo(ETipo.BOOLEAN)))
+				compatibles(tipo1, new Tipo(ETipo.BOOLEAN))
+				|| /*Nacho*/
+				compatibles(tipo1, new Tipo(ETipo.NATURAL))
+				||
+				compatibles(tipo1, new Tipo(ETipo.FLOAT))
+				||
+				compatibles(tipo1, new Tipo(ETipo.CHAR))
+				)//VER SI AÑADIMOS MÁS, COMO ARRAY Y ESO
+				//Ver la diferencia entre tipos REF y POINTER
 				_instrucciones.add(new InstruccionDESAPILAIND());				
 			else
 				_instrucciones.add(new InstruccionMUEVE(tipo1.getTam()));
@@ -1096,7 +1106,7 @@ public void RDecs() throws Error {
 			resp1 = RExpSimple(tipofinal,  EModo.VALOR);
 
 		} 
-		else if (_tokenActual.getTipo() == TipoToken.OR)
+		/*else if (_tokenActual.getTipo() == TipoToken.OR)
 		{
 			boolean parche=false;//revisar!
 			Resp resp = OpAd();
@@ -1105,7 +1115,7 @@ public void RDecs() throws Error {
 			tipofinal = tipoDeExpBin(resp.getTipo(), tipo1, resp2.getTipo());
 			
 			
-		}
+		}*/
 		else {
 			resp1 = new Resp(tipo1, modo1);
 		}
@@ -1299,6 +1309,9 @@ public void RDecs() throws Error {
 				
 			}	
 			*/
+		//!!WILLY, HE SACADO ESTO, MIRA LO DE LA COMPATIBILIDAD!!
+			_instrucciones.add(new InstruccionAPILAIND());
+			_etq++;
 		} else if (_tokenActual.getTipo() == TipoToken.TRUE) {
 			_instrucciones.add(new InstruccionAPILA(1));
 			resp = new Resp(new Tipo(ETipo.BOOLEAN), EModo.VALOR);
@@ -1536,7 +1549,7 @@ public void RDecs() throws Error {
 				} else			return new Tipo(ETipo.ERR);
 
 			} else {
-				if ((tOperando1 == tOperando2)
+				if ((tOperando1.getTipo() == tOperando2.getTipo())//cambiado
 						&& (tOperando1.getTipo() == ETipo.BOOLEAN))
 					return new Tipo(ETipo.BOOLEAN);
 				else
@@ -1563,14 +1576,14 @@ public void RDecs() throws Error {
 		else {
 			if ((tOperador1.getTipo() == ETipo.BOOLEAN)
 					|| (tOperador2.getTipo() == ETipo.BOOLEAN)) {
-				if (tOperador1 == tOperador2)
+				if (tOperador1.getTipo() == tOperador2.getTipo())//cambiado
 					return new Tipo(ETipo.BOOLEAN);
 				else
 					return new Tipo(ETipo.ERR);
 			} else {
 				if ((tOperador1.getTipo() == ETipo.CHAR)
 						|| (tOperador2.getTipo() == ETipo.CHAR)) {
-					if (tOperador1 == tOperador2)
+					if (tOperador1.getTipo() == tOperador2.getTipo())//cambiado
 						return new Tipo(ETipo.BOOLEAN);
 					else
 						return new Tipo(ETipo.ERR);
@@ -1592,7 +1605,7 @@ public void RDecs() throws Error {
 			return new Tipo(ETipo.ERR);
 		else {
 			if (tOperacion.getTipo() == ETipo.DESP) {
-				if ((tOperador1 == tOperador2)
+				if ((tOperador1.getTipo() == tOperador2.getTipo())//cambiado
 						&& (tOperador1.getTipo() == ETipo.NATURAL))
 					return new Tipo(ETipo.NATURAL);
 				else
