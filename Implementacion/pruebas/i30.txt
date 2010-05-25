@@ -3,5 +3,6 @@ integer y;
 &
 x:=200;
 y:=100;
+out(x+y);
 x:=x+y;
 out(x);

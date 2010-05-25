@@ -3,9 +3,9 @@
 #mod asocia por izda
 #mod tiene más prioridad que desplz
 
-integer a;
-integer b;
-integer c;
+natural a;
+natural b;
+natural c;
 integer d;
 integer e;
 &
