@@ -1,6 +1,6 @@
 package vm.instruccion;
 
-public class InstruccionOUT extends Instruccion{
+public class InstruccionOUT extends InstruccionConOperando{
 		
 	/**
 	 * 
