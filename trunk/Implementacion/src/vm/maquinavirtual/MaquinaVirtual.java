@@ -25,6 +25,8 @@ public class MaquinaVirtual {
 	public boolean modoTraza;
 	public InputStreamReader isr;
 	public BufferedReader br;
+	//--
+	private int pHeap;
 	
 	public MaquinaVirtual(boolean t){
 		modoTraza = t;
@@ -33,12 +35,14 @@ public class MaquinaVirtual {
 			br = new BufferedReader (isr);
 		}
 		instrucciones = new Vector<Instruccion>();
-		memoria = new double[32];
+		//memoria = new double[32];
+		memoria = new double[64];
 		for (int i=0; i<32; i++)
 			memoria[i] = 0;
 		pila = new Stack<Double>();
 		setPc(0);
 		setSig_pc(1);
+		pHeap=memoria.length-1;
 	}
 	
 	public void run(){
@@ -96,7 +100,7 @@ public class MaquinaVirtual {
 	}
 	
 	public void imprimeMemoria(){		
-		for (int i=0;i<32;i++){
+		for (int i=0;i<64;i++){
 			if ((i+1)%8 == 0)
 				System.out.println("["+memoria[i]+"]");
 			else
