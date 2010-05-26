@@ -770,15 +770,26 @@ public class AnalizadorSintactico {
 	public void InstrFor() throws Error {
 		// REVISAR CIRCUITO CORTO
 		emparejaToken(TipoToken.FOR);
-		// ..
-		// ..
-		// Exp0 y Exp1
-		// if (tipo.getTipo() == ETipo.BOOLEAN){
-		emparejaToken(TipoToken.DO);
-
-		// }
-		// else
-		// throw new Error("InstrFor: El tipo de la expresión no es BOOLEAN.");
+		int etq1 = _etq;
+		boolean parh = false;
+		//Tipo tipo1 = Exp(parh).getTipo();
+		InstrAsig(_tokenActual);//NECESITO EL TIPO!!
+		//Tipo tipo1 = _tokenActual.getTipo();
+		emparejaToken(TipoToken.TO);
+		Tipo tipo2 = Exp(parh).getTipo();
+		if (compatibles(tipo1, tipo2)) 
+			{
+			emparejaToken(TipoToken.DO);
+			_instrucciones.add(new InstruccionIRF(valorIndefinido));
+			int etq2 = _etq;
+			_etq++;
+			InsComp();
+			_instrucciones.add(new InstruccionIRA(etq1));
+			_etq++;
+			parchea(etq2, _etq);
+			}
+		 else
+			 throw new Error("InstrFor: Los tipos de las expresiones no son compatibles.");
 	}
 
 	public void InsComp() throws Error {
