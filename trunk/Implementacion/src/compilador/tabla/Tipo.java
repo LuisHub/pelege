@@ -13,7 +13,10 @@ public class Tipo {
 	private Tipo tbase;
 	private Vector<Campo> campos;
 	private Vector<Parametro> parametros;
+
 	
+
+
 	public Tipo(ETipo tipo){
 		this.tipo = tipo;
 	}
@@ -43,6 +46,12 @@ public class Tipo {
 	public Tipo(ETipo tipo, int num_elems, Tipo tbase, int tam){
 		this.tipo = tipo;
 		this.num_elems = num_elems;
+		this.tbase = tbase;
+		this.tam = tam;	
+	}
+	
+	public Tipo(ETipo tipo, Tipo tbase, int tam){
+		this.tipo = tipo;
 		this.tbase = tbase;
 		this.tam = tam;	
 	}
