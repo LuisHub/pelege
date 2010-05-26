@@ -968,6 +968,7 @@ public class AnalizadorSintactico {
 			emparejaToken(TipoToken.PARCLA);
 			emparejaToken(TipoToken.SEPARADOR);
 			_instrucciones.add(new InstruccionOUT());
+			_etq++;
 		} else
 			throw new Error(
 					"InstrEsc: El tipo de la expresión entre paréntesis es ERROR. "
