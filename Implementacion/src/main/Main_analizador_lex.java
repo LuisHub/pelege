@@ -11,7 +11,7 @@ public class Main_analizador_lex {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		AnalizadorLexico a=new AnalizadorLexico("pruebas/i2.txt");
+		AnalizadorLexico a=new AnalizadorLexico("pruebas/i1.txt");
 		
 		a.iniciaLexico();
 		
@@ -32,6 +32,11 @@ public class Main_analizador_lex {
 			
 		}
 
+		
+		System.out.print(auxiliar.getTipo()+"    ");
+		System.out.print(auxiliar.getLexema()+"   ");
+		System.out.print("linea: "+auxiliar.getNumLinea()+"    ");
+		System.out.println("columna: "+auxiliar.getNumColumna());
 	}
 
 }

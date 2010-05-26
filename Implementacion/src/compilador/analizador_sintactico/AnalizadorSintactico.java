@@ -16,7 +16,7 @@ public class AnalizadorSintactico {
 		return _instrucciones;
 	}
 
-	private final int valorIndefinido=Integer.MIN_VALUE;
+	private final int valorIndefinido = Integer.MIN_VALUE;
 	public TablaSimbolos _ts;
 	public AnalizadorLexico _lexico;
 	public Vector<Instruccion> _instrucciones;
@@ -26,29 +26,28 @@ public class AnalizadorSintactico {
 	public int _tamDatosLocales;
 	public int _numNiveles;
 	public int _etq;
-	
-	
-	private final int longInicio=4;
-	private final int longPrologo=13;
-	private final int longEpilogo=13;
-	private final int longInicioPaso=3;
-	private final int longFinPaso=1;
+
+	private final int longInicio = 4;
+	private final int longPrologo = 13;
+	private final int longEpilogo = 13;
+	private final int longInicioPaso = 3;
+	private final int longFinPaso = 1;
 	private final int longApilaRet = 5;
-	private final int longPasoParametro= 1;
+	private final int longPasoParametro = 1;
 	private final int longDireccionParFormal = 2;
-	
-	
+
 	public Vector<String> _pend;
+	public Vector<Tipo> _pend_tipo;
 
 	public AnalizadorSintactico(String e) {
 
-	
 		_ts = new TablaSimbolos();
-		_lexico= new AnalizadorLexico(e);
-		_lexico.iniciaLexico();			
+		_lexico = new AnalizadorLexico(e);
+		_lexico.iniciaLexico();
 		_instrucciones = new Vector<Instruccion>();
-		_tokenActual=_lexico.sigToken();
+		_tokenActual = _lexico.sigToken();
 		_pend = new Vector<String>();
+		_pend_tipo=new Vector<Tipo>();
 		_numNiveles = 0;
 	}
 
@@ -63,37 +62,37 @@ public class AnalizadorSintactico {
 	}
 
 	public void programa() throws Error {
-		
-		_etq=0;
-		_nivel=0;
-		inicio(valorIndefinido,valorIndefinido);
-		_etq +=  longInicio;
+
+		_etq = 0;
+		_nivel = 0;
+		inicio(valorIndefinido, valorIndefinido);
+		_etq += longInicio;
 		_ts.creaTS();
-		_dir=0;
+		_dir = 0;
 		_instrucciones.add(new InstruccionIRA(valorIndefinido));
 		_etq++;
 		Declaraciones();
-		
+
 		emparejaToken(TipoToken.PROGRAM);
 		_numNiveles++;
 		parchea(0, _numNiveles + 1);
 		parchea(2, _numNiveles + _tamDatosLocales);
-		parchea(4,_etq);
-		if (_pend.size()>0)
-			throw new Error("quedan punteros con tipos no declarados");				
+		parchea(4, _etq);
+		if (_pend.size() > 0)
+			throw new Error("quedan punteros con tipos no declarados");
 
 		Sentencias();
 		_instrucciones.add(new InstruccionSTOP());
-		if (_tokenActual.getTipo()==TipoToken.EOF)
-			{
+		if (_tokenActual.getTipo() == TipoToken.EOF) {
 			emparejaToken(TipoToken.EOF);
-			System.out.println("Se ha realizado el analisis sintáctico con éxito.");
-			}
+			System.out
+					.println("Se ha realizado el analisis sintáctico con éxito.");
+		}
 	}
 
 	// para las declaraciones
 	public void Declaraciones() throws Error {
-		
+
 		if (_tokenActual.getTipo() != TipoToken.PROGRAM) {
 
 			if (_tokenActual.getTipo() == TipoToken.TYPE) {
@@ -107,680 +106,654 @@ public class AnalizadorSintactico {
 					|| (_tokenActual.getTipo() == TipoToken.PUNTERO)
 					|| (_tokenActual.getTipo() == TipoToken.ARRAY)
 					|| (_tokenActual.getTipo() == TipoToken.RECORD)) {
-			DecsVar();
-			_tamDatosLocales = _dir;
+				DecsVar();
+				_tamDatosLocales = _dir;
 			} else if (_tokenActual.getTipo() == TipoToken.PROCEDURE) {
 				DecsProc();
-				_dir=_tamDatosLocales;
+				_dir = _tamDatosLocales;
 			}
-			
+
 			Declaraciones();
 		}
-		//TODO mirar si quedan atribitos en pendientes y si quedan error
+		// TODO mirar si quedan atribitos en pendientes y si quedan error
 	}
-	
 
+	// /////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////
-	
-	
-	
-	public void DecsTipo() throws Error{
-					
-			emparejaToken(TipoToken.TYPE);
-			if (_tokenActual.getTipo()==TipoToken.ID){
-				Resp dec = DecTipo();				
-				_ts.anadeId(dec.getId(), dec.getProps());
-				if (dec.getProps().getClase()==EClase.TIPO)
-					_pend.remove(dec.getId());
+	public void DecsTipo() throws Error {
+
+		emparejaToken(TipoToken.TYPE);
+		if (_tokenActual.getTipo() == TipoToken.ID) {
+			Resp dec = DecTipo();
+			_ts.anadeId(dec.getId(), dec.getProps());
+		
+			if (_pend.contains(dec.getId()))
+			{
+				int pos=_pend.indexOf(dec.getId());
+				
+			//this._pend_tipo.elementAt(pos).setTam(dec.getTipo().gett)
+				
+				//TODO tenog que encontrar alguna forma de meterle el tipo
+				/*int pos=_pend.indexOf(dec.getId());
+			Tipo tipoNoDeclarado= this._pend_tipo.elementAt(pos);
+			tipoNoDeclarado.setCampos(dec.getTipo().getCampos());
+			tipoNoDeclarado.setNum_elems(dec.getTipo().getNum_elems());
+			tipoNoDeclarado.setParametros(dec.getTipo().getParametros());
+			tipoNoDeclarado.setTam(dec.getTipo().getTam());
+			tipoNoDeclarado.setTbase(dec.getTipo().getTbase());
+			tipoNoDeclarado.setTipo(dec.getTipo().getTipo());
+			*/
+				_pend.remove(dec.getId());
+				//this._pend_tipo.remove(pos);
 			}
 			
-}
+		}
 
-	
-	
-public Resp DecTipo()throws Error{									
-	String id = _tokenActual.getLexema();										
-	emparejaToken(TipoToken.ID);		
-	emparejaToken(TipoToken.IGUAL);								
-	Tipo tipo = Tipo1(true);
-	if (!errorEnDeclaracion(id, _nivel, tipo)){
-		Propiedades props = new Propiedades(EClase.TIPO, tipo, _nivel);
-		emparejaToken( TipoToken.SEPARADOR);
-		return new Resp(id, props);	
 	}
-	else				
-		throw new Error("DecTipo: Identificador duplicado o referencia a un identificador que no es de clase TIPO. " + id + " " + _tokenActual.toString() + ")");				
-}
-	
-public Tipo Tipo1(boolean estipo) throws Error{			
-	Tipo tipo = null;
-	if (_tokenActual.getTipo()==TipoToken.INTEGER){				
-		tipo = new Tipo(ETipo.INTEGER, 1);
-		emparejaToken( TipoToken.INTEGER);
-	}
-	else if (_tokenActual.getTipo()==TipoToken.BOOLEAN){
-		tipo = new Tipo(ETipo.BOOLEAN, 1);
-		emparejaToken( TipoToken.BOOLEAN);
-	}
-	else if (_tokenActual.getTipo()==TipoToken.NATURAL){
-		tipo = new Tipo(ETipo.NATURAL, 1);
-		emparejaToken( TipoToken.NATURAL);
-	}
-	else if (_tokenActual.getTipo()==TipoToken.FLOAT){
-		tipo = new Tipo(ETipo.FLOAT, 1);
-		emparejaToken( TipoToken.FLOAT);
-	}
-	else if (_tokenActual.getTipo()==TipoToken.CHARACTER){
-		tipo = new Tipo(ETipo.CHAR, 1);
-		emparejaToken( TipoToken.CHARACTER);
-	}
-	else if (_tokenActual.getTipo()==TipoToken.BOOLEAN){
-		tipo = new Tipo(ETipo.BOOLEAN, 1);
-		emparejaToken( TipoToken.BOOLEAN);
-	}
-	else if (_tokenActual.getTipo()==TipoToken.BOOLEAN){
-		tipo = new Tipo(ETipo.BOOLEAN, 1);
-		emparejaToken( TipoToken.BOOLEAN);
-	}
-	else if (_tokenActual.getTipo()==TipoToken.PUNTERO){
-		//TODO esto lo tendre que hacer con mas cabeza tendre que poner lo de pendiente aqui
-		emparejaToken( TipoToken.PUNTERO);
-	//	tipo = new Tipo(ETipo.BOOLEAN, 1);
-	//	emparejaToken( TipoToken.BOOLEAN);
-		
-		
-	}
-	else if (_tokenActual.getTipo()==TipoToken.ID){
+
+	public Resp DecTipo() throws Error {
 		String id = _tokenActual.getLexema();
-		
-		
-		if (estipo)
-		{
-			emparejaToken( TipoToken.ID);
-			tipo = new Tipo(ETipo.REF, id, _ts.getTipo(id).getTam());
-		}else  if (_ts.existeId(id) && _ts.getClase(id)!=EClase.TIPO)
-					throw new Error("no ha sido declarado el tipo " + id + " declarelo antes que la variable ");							
-		else{
-			emparejaToken( TipoToken.ID);
-			tipo = new Tipo(ETipo.REF, id, _ts.getTipo(id).getTam());
+		emparejaToken(TipoToken.ID);
+		emparejaToken(TipoToken.IGUAL);
+		Tipo tipo = Tipo1(true);
+		if (!errorEnDeclaracion(id, _nivel, tipo)) {
+			Propiedades props = new Propiedades(EClase.TIPO, tipo, _nivel);
+			emparejaToken(TipoToken.SEPARADOR);
+			return new Resp(id, props);
+		} else
+			throw new Error(
+					"DecTipo: Identificador duplicado o referencia a un identificador que no es de clase TIPO. "
+							+ id + " " + _tokenActual.toString() + ")");
+	}
+
+	public Tipo Tipo1(boolean tieneQEstarDecla) throws Error {
+		Tipo tipo = null;
+		if (_tokenActual.getTipo() == TipoToken.INTEGER) {
+			tipo = new Tipo(ETipo.INTEGER, 1);
+			emparejaToken(TipoToken.INTEGER);
+		} else if (_tokenActual.getTipo() == TipoToken.BOOLEAN) {
+			tipo = new Tipo(ETipo.BOOLEAN, 1);
+			emparejaToken(TipoToken.BOOLEAN);
+		} else if (_tokenActual.getTipo() == TipoToken.NATURAL) {
+			tipo = new Tipo(ETipo.NATURAL, 1);
+			emparejaToken(TipoToken.NATURAL);
+		} else if (_tokenActual.getTipo() == TipoToken.FLOAT) {
+			tipo = new Tipo(ETipo.FLOAT, 1);
+			emparejaToken(TipoToken.FLOAT);
+		} else if (_tokenActual.getTipo() == TipoToken.CHARACTER) {
+			tipo = new Tipo(ETipo.CHAR, 1);
+			emparejaToken(TipoToken.CHARACTER);
+		} else if (_tokenActual.getTipo() == TipoToken.BOOLEAN) {
+			tipo = new Tipo(ETipo.BOOLEAN, 1);
+			emparejaToken(TipoToken.BOOLEAN);
+		} else if (_tokenActual.getTipo() == TipoToken.BOOLEAN) {
+			tipo = new Tipo(ETipo.BOOLEAN, 1);
+			emparejaToken(TipoToken.BOOLEAN);
+		} else if (_tokenActual.getTipo() == TipoToken.POINTER) {
+			// TODO esto lo tendre que hacer con mas cabeza tendre que poner lo
+			// de pendiente aqui
+			emparejaToken(TipoToken.POINTER);
 			
-		}
-							
+			Tipo tipo_aux = Tipo1(false);
+			
+			tipo = new Tipo(ETipo.POINTER, tipo_aux,1);
+	
+			
+		} else if (_tokenActual.getTipo() == TipoToken.ID) {
+			String id = _tokenActual.getLexema();
+			emparejaToken(TipoToken.ID);
+
+			if (tieneQEstarDecla) {
+				tipo = new Tipo(ETipo.REF, id, _ts.getTipo(id).getTam());
+
+				if (_ts.existeId(id) && _ts.getClase(id) != EClase.TIPO)
+					throw new Error("no ha sido declarado el tipo " + id
+							+ " declarelo antes que la variable ");
+
+			} else {
+				// para los puntero que no estan declarados
+				if (_ts.existeId(id) && _ts.getClase(id) == EClase.TIPO)
+					tipo = new Tipo(ETipo.REF, id, _ts.getTipo(id).getTam());
+				else {
+					tipo = new Tipo(ETipo.REF, id, -1);
+					_pend.add(id);
+					//this._pend_tipo.add(tipo);
+					
+				}
+			}
+
+		} else if (_tokenActual.getTipo() == TipoToken.ARRAY) {
+			emparejaToken(TipoToken.ARRAY);
+			emparejaToken(TipoToken.CORAP);
+			int n = Integer.parseInt(_tokenActual.getLexema());
+			emparejaToken(TipoToken.NATURAL);
+			emparejaToken(TipoToken.CORCLA);
+			emparejaToken(TipoToken.OF);
+			Tipo tipo_aux = Tipo1(true);
+			if (!referenciaErronea(tipo_aux)) {
+				tipo = new Tipo(ETipo.ARRAY, n, tipo_aux, tipo_aux.getTam() * n);
+			} else
+				throw new Error("Tipo: referencia errónea ya que "
+						+ tipo_aux.getId() + "no está definido. "
+						+ _tokenActual.toString() + ")");
+
+		} else if (_tokenActual.getTipo() == TipoToken.RECORD) {
+			emparejaToken(TipoToken.RECORD);
+			emparejaToken(TipoToken.LLAVEAP);
+			Resp campos = Campos();
+			tipo = new Tipo(ETipo.RECORD, campos.getCampos(), campos.getTam());
+			emparejaToken(TipoToken.LLAVECLA);
+		} else
+			throw new Error(
+					"Tipo: Se esperaba tokenINTEGER o tokenBOOLEAN o tokenID o tokenARRAY o tokenRECORD y no "
+							+ _tokenActual.toString() + ")");
+		return tipo;
 	}
-	else if (_tokenActual.getTipo()==TipoToken.ARRAY){
-		emparejaToken( TipoToken.ARRAY);
-		emparejaToken( TipoToken.CORAP);
-		int n = Integer.parseInt(_tokenActual.getLexema());
-		emparejaToken( TipoToken.NATURAL);
-		emparejaToken( TipoToken.CORCLA);
-		emparejaToken( TipoToken.OF);
-		Tipo tipo_aux = Tipo1(false);
-		if (!referenciaErronea(tipo_aux)){
-			tipo = new Tipo(ETipo.ARRAY, n, tipo_aux, tipo_aux.getTam() * n);
-		}
-		else
-			throw new Error("Tipo: referencia errónea ya que " + tipo_aux.getId() + "no está definido. "+ _tokenActual.toString() + ")");					
-								
-	}
-	else if (_tokenActual.getTipo()==TipoToken.RECORD){
-		emparejaToken( TipoToken.RECORD);
-		emparejaToken( TipoToken.LLAVEAP);	
-		Resp campos = Campos();
-		tipo = new Tipo(ETipo.RECORD, campos.getCampos(), campos.getTam());			
-		emparejaToken( TipoToken.LLAVECLA);					
-	}		
-	else
-		throw new Error("Tipo: Se esperaba tokenINTEGER o tokenBOOLEAN o tokenID o tokenARRAY o tokenRECORD y no " + _tokenActual.toString() + ")");	
-	return tipo;
-}	
-	
-	
-	
-public Resp Campos() throws Error{
-	
-	Resp campo = Campo();
-	Campo campo_aux = new Campo(campo.getId(), campo.getTipo(), 0);
-	Vector<Campo> vector_aux = new Vector<Campo>();
-	vector_aux.add(campo_aux);
-	Resp campos_aux = new Resp(vector_aux, campo_aux.getTipo().getTam());
-	return RCampos(campos_aux);
-}
 
-public Resp Campo() throws Error{
-	Tipo tipo = Tipo1(false);
-	String id = _tokenActual.getLexema();
-	emparejaToken( TipoToken.ID);
-		
-	emparejaToken( TipoToken.SEPARADOR);
-	return new Resp(id, tipo);		
-}
+	public Resp Campos() throws Error {
 
-
-public Resp RCampos(Resp campos) throws Error{
-	if (_tokenActual.getTipo()!=TipoToken.LLAVECLA){
 		Resp campo = Campo();
-		if (!existeCampo(campo.getId(), campos.getCampos())){
-			Campo campo_aux = new Campo(campo.getId(), campo.getTipo(), campos.getTam());
-			campos.getCampos().add(campo_aux);
-			campos.setTam(campos.getTam() + campo.getTipo().getTam());
-			return RCampos(campos);
+		Campo campo_aux = new Campo(campo.getId(), campo.getTipo(), 0);
+		Vector<Campo> vector_aux = new Vector<Campo>();
+		vector_aux.add(campo_aux);
+		Resp campos_aux = new Resp(vector_aux, campo_aux.getTipo().getTam());
+		return RCampos(campos_aux);
+	}
+
+	public Resp Campo() throws Error {
+		Tipo tipo = Tipo1(true);
+		String id = _tokenActual.getLexema();
+		emparejaToken(TipoToken.ID);
+
+		emparejaToken(TipoToken.SEPARADOR);
+		return new Resp(id, tipo);
+	}
+
+	public Resp RCampos(Resp campos) throws Error {
+		if (_tokenActual.getTipo() != TipoToken.LLAVECLA) {
+			Resp campo = Campo();
+			if (!existeCampo(campo.getId(), campos.getCampos())) {
+				Campo campo_aux = new Campo(campo.getId(), campo.getTipo(),
+						campos.getTam());
+				campos.getCampos().add(campo_aux);
+				campos.setTam(campos.getTam() + campo.getTipo().getTam());
+				return RCampos(campos);
+			} else
+				throw new Error("RCampos: Campo " + campo.getId()
+						+ " duplicado. " + _tokenActual.toString() + ")");
+		} else
+			return campos;
+	}
+
+	public boolean existeCampo(String id, Vector<Campo> campos) {
+		boolean encontrado = false;
+		int i = 0;
+		while (encontrado == false && i < campos.size()) {
+			Campo campo = (Campo) campos.elementAt(i);
+			if (campo.getId().equals(id)) {
+				encontrado = true;
+			} else
+				i++;
 		}
-		else
-			throw new Error("RCampos: Campo " + campo.getId() + " duplicado. " + _tokenActual.toString() + ")");
+		return encontrado;
 	}
-	else
-		return campos;
-}
-	
-	
-public boolean existeCampo(String id, Vector<Campo> campos){
-	boolean encontrado=false;
-	int i=0;
-	while (encontrado==false && i<campos.size()){
-		Campo campo= (Campo) campos.elementAt(i);
-		if (campo.getId().equals(id)){
-			encontrado=true;
-		}
-		else
-			i++;				
+
+	public boolean referenciaErronea(Tipo tipo) {
+		return tipo.getTipo() == ETipo.REF && !_ts.existeId(tipo.getId());
 	}
-	return encontrado;
-}	
-	
-	
-	
-	
-public boolean referenciaErronea(Tipo tipo){
-	return tipo.getTipo() == ETipo.REF && !_ts.existeId(tipo.getId());
-}	
 
-
-public boolean errorEnDeclaracion(String id, int nivel, Tipo tipo){
-	return (_ts.existeId(id) && _ts.getNivel(id)==nivel || referenciaErronea(tipo));
-}	
-	
-	
-public void DecsVar() throws Error{
-			Resp dec = DecVar();				
-			_ts.anadeId(dec.getId(), dec.getProps());
-			
-}
-		
-
-
-
-
-//_tokenActual -> TokenId
-public Resp DecVar()throws Error{	
-	Tipo tipo = Tipo1(false);
-	String id = _tokenActual.getLexema();		
-	emparejaToken(TipoToken.ID);
-	
-	
-	if (!errorEnDeclaracion(id, _nivel, tipo)){	
-		Propiedades props = new Propiedades(EClase.VAR, _dir, tipo, _nivel);															
-		_dir = _dir + tipo.getTam();
-		emparejaToken( TipoToken.SEPARADOR);
-		return new Resp(id, props);		
+	public boolean errorEnDeclaracion(String id, int nivel, Tipo tipo) {
+		return (_ts.existeId(id) && _ts.getNivel(id) == nivel || referenciaErronea(tipo));
 	}
-	else				
-		throw new Error("DecVar: Identificador duplicado o referencia a un identificador que no es de clase TIPO. " + id + " " + _tokenActual.toString() + ")");
-}
 
+	public void DecsVar() throws Error {
+		Resp dec = DecVar();
+		_ts.anadeId(dec.getId(), dec.getProps());
 
-public void DecsProc() throws Error{
-	
+	}
+
+	// _tokenActual -> TokenId
+	public Resp DecVar() throws Error {
+		Tipo tipo = Tipo1(true);
+		String id = _tokenActual.getLexema();
+		emparejaToken(TipoToken.ID);
+
+		if (!errorEnDeclaracion(id, _nivel, tipo)) {
+			Propiedades props = new Propiedades(EClase.VAR, _dir, tipo, _nivel);
+			_dir = _dir + tipo.getTam();
+			emparejaToken(TipoToken.SEPARADOR);
+			return new Resp(id, props);
+		} else
+			throw new Error(
+					"DecVar: Identificador duplicado o referencia a un identificador que no es de clase TIPO. "
+							+ id + " " + _tokenActual.toString() + ")");
+	}
+
+	public void DecsProc() throws Error {
+
 		Resp decProc = DecProc();
-		if (!errorEnDeclaracion(decProc.getId(), _nivel, decProc.getProps().getTipo())){
-				_ts.anadeId(decProc.getId(), decProc.getProps());				
-			
-		}
-		else
-			throw new Error("DecsProc: Identificador ya definido. " + _tokenActual.toString());
-	
-}
+		if (!errorEnDeclaracion(decProc.getId(), _nivel, decProc.getProps()
+				.getTipo())) {
+			_ts.anadeId(decProc.getId(), decProc.getProps());
 
+		} else
+			throw new Error("DecsProc: Identificador ya definido. "
+					+ _tokenActual.toString());
 
-
-public Resp DecProc() throws Error{
-	int inicio;
-	emparejaToken( TipoToken.PROCEDURE);
-	String id = _tokenActual.getLexema();
-	emparejaToken( TipoToken.ID);
-	int _tamDatosLocalesAnt = _tamDatosLocales; 
-	TablaSimbolos _tsPadre = _ts;
-	_ts = new TablaSimbolos();
-	_ts.creaTS(_tsPadre);
-	_nivel++;
-	if (_numNiveles < _nivel)
-		_numNiveles = _nivel;
-	_dir=0;
-	_tamDatosLocales=0;
-	Vector<Parametro> params = FParams();
-	
-		
-	Propiedades props = new Propiedades(EClase.PROC, new Tipo(ETipo.PROC, params), _nivel);
-//	juntar propiedades
-	if (!errorEnDeclaracion(id, _nivel, props.getTipo())){
-		_ts.anadeId(id, props);
-		_ts.getRegistroTabla(id).setNivel(_nivel);
-		inicio = Bloque(id);			
-		//parchear la dirección del procedimiento en la tabla asociada al procedimiento
-		props.setInicio(inicio);			
-		_nivel--;
-		_ts = _tsPadre;
-		_tamDatosLocales = _tamDatosLocalesAnt;
-		
-		return new Resp(id, props);
 	}
-	else
-		throw new Error("DecProc: Identificador ya definido. " + _tokenActual.toString());
-	
-}
 
-public Vector<Parametro> FParams() throws Error{
-	
-		emparejaToken( TipoToken.PARAP);
-		if (_tokenActual.getTipo()!=TipoToken.PARCLA)
-		{
-		Vector<Parametro> params = LFParams();
-		emparejaToken( TipoToken.PARCLA);
-		return params;
-		}
-		else{ 
-			emparejaToken( TipoToken.PARCLA);
+	public Resp DecProc() throws Error {
+		int inicio;
+		emparejaToken(TipoToken.PROCEDURE);
+		String id = _tokenActual.getLexema();
+		emparejaToken(TipoToken.ID);
+		int _tamDatosLocalesAnt = _tamDatosLocales;
+		TablaSimbolos _tsPadre = _ts;
+		_ts = new TablaSimbolos();
+		_ts.creaTS(_tsPadre);
+		_nivel++;
+		if (_numNiveles < _nivel)
+			_numNiveles = _nivel;
+		_dir = 0;
+		_tamDatosLocales = 0;
+		Vector<Parametro> params = FParams();
+
+		Propiedades props = new Propiedades(EClase.PROC, new Tipo(ETipo.PROC,
+				params), _nivel);
+		// juntar propiedades
+		if (!errorEnDeclaracion(id, _nivel, props.getTipo())) {
+			_ts.anadeId(id, props);
+			_ts.getRegistroTabla(id).setNivel(_nivel);
+			inicio = Bloque(id);
+			// parchear la dirección del procedimiento en la tabla asociada al
+			// procedimiento
+			props.setInicio(inicio);
+			_nivel--;
+			_ts = _tsPadre;
+			_tamDatosLocales = _tamDatosLocalesAnt;
+
+			return new Resp(id, props);
+		} else
+			throw new Error("DecProc: Identificador ya definido. "
+					+ _tokenActual.toString());
+
+	}
+
+	public Vector<Parametro> FParams() throws Error {
+
+		emparejaToken(TipoToken.PARAP);
+		if (_tokenActual.getTipo() != TipoToken.PARCLA) {
+			Vector<Parametro> params = LFParams();
+			emparejaToken(TipoToken.PARCLA);
+			return params;
+		} else {
+			emparejaToken(TipoToken.PARCLA);
 			return new Vector<Parametro>();
 		}
-		
-	
-	
-}
-	
-public Vector<Parametro> LFParams() throws Error{
-	Resp fParam = FParam();
-	Vector<Parametro> params = new Vector<Parametro>();
-	params.add(fParam.getParam());
-	_ts.anadeId(fParam.getId(), fParam.getProps());
-	return RLFParams(params);		
-}
 
-public Vector<Parametro> RLFParams(Vector<Parametro> params1) throws Error{
-	if (_tokenActual.getTipo()==TipoToken.COMA){
-		emparejaToken( TipoToken.COMA);
+	}
+
+	public Vector<Parametro> LFParams() throws Error {
 		Resp fParam = FParam();
-		params1.add(fParam.getParam());
-		if (!(_ts.existeId(fParam.getId()) && _ts.getNivel(fParam.getId()) == _nivel)){
-			_ts.anadeId(fParam.getId(), fParam.getProps());
-			return RLFParams(params1);
+		Vector<Parametro> params = new Vector<Parametro>();
+		params.add(fParam.getParam());
+		_ts.anadeId(fParam.getId(), fParam.getProps());
+		return RLFParams(params);
+	}
+
+	public Vector<Parametro> RLFParams(Vector<Parametro> params1) throws Error {
+		if (_tokenActual.getTipo() == TipoToken.COMA) {
+			emparejaToken(TipoToken.COMA);
+			Resp fParam = FParam();
+			params1.add(fParam.getParam());
+			if (!(_ts.existeId(fParam.getId()) && _ts.getNivel(fParam.getId()) == _nivel)) {
+				_ts.anadeId(fParam.getId(), fParam.getProps());
+				return RLFParams(params1);
+			} else
+				throw new Error("DecsProc: Identificador ya definido. "
+						+ _tokenActual.toString());
+		} else
+			return params1;
+	}
+
+	public Resp FParam() throws Error {
+		if (_tokenActual.getTipo() == TipoToken.VAR) {
+			emparejaToken(TipoToken.VAR);
+			Tipo tipo = Tipo1(true);
+			String id = _tokenActual.getLexema();
+			emparejaToken(TipoToken.ID);
+			Propiedades props = new Propiedades(EClase.PVAR, _dir, tipo, _nivel);
+			Parametro param = new Parametro(EModo.VARIABLE, tipo, _dir);
+			_dir++;
+			return new Resp(id, props, param);
+		} else {
+
+			Tipo tipo = Tipo1(false);
+			String id = _tokenActual.getLexema();
+			emparejaToken(TipoToken.ID);
+			Propiedades props = new Propiedades(EClase.VAR, _dir, tipo, _nivel);
+			Parametro param = new Parametro(EModo.VALOR, tipo, _dir);
+			_dir = _dir + tipo.getTam();
+			return new Resp(id, props, param);
 		}
-		else
-			throw new Error("DecsProc: Identificador ya definido. " + _tokenActual.toString());			
 	}
-	else
-		return params1;
-}
 
-public Resp FParam() throws Error{
-	if (_tokenActual.getTipo()==TipoToken.VAR){
-		emparejaToken( TipoToken.VAR);
-		Tipo tipo = Tipo1(false);
-		String id = _tokenActual.getLexema();
-		emparejaToken( TipoToken.ID);
-		Propiedades props = new Propiedades(EClase.PVAR, _dir, tipo, _nivel);
-		Parametro param = new Parametro(EModo.VARIABLE, tipo, _dir);
-		_dir++;
-		return new Resp(id, props, param);			
+	public int Bloque(String id) throws Error {
+		int inicio = 0;
+		emparejaToken(TipoToken.LLAVEAP);
+		Declaraciones();
+		emparejaToken(TipoToken.PROGRAM);
+
+		inicio = _etq;
+		// parchear la dirección del procedimiento en la tabla asociada al
+		// procedimiento para posibles llamadas recursivas
+		_ts.getRegistroTabla(id).setInicio(inicio);
+
+		prologo(_nivel, _tamDatosLocales);
+		_etq += longPrologo;
+
+		Sentencias();
+		emparejaToken(TipoToken.LLAVECLA);
+		// aqui tengo que parchear seguro con el inicio
+		// parcheo +11
+
+		epilogo(_nivel);
+		_instrucciones.add(new InstruccionIRIND());
+		_etq = _etq + longEpilogo + 1;
+
+		return inicio;
+
 	}
-	else 
-	{
-		
-		Tipo tipo = Tipo1(false);
-		String id = _tokenActual.getLexema();
-		emparejaToken( TipoToken.ID);
-		Propiedades props = new Propiedades(EClase.VAR, _dir,  tipo, _nivel);
-		Parametro param = new Parametro(EModo.VALOR, tipo, _dir);
-		_dir = _dir + tipo.getTam();
-		return new Resp(id, props, param);
+
+	public void Sentencias() throws Error {
+
+		ListaSents();
 	}
-}
 
-
-public int Bloque(String id) throws Error{
-	int inicio=0;
-	emparejaToken( TipoToken.LLAVEAP);	
-	Declaraciones();
-	emparejaToken(TipoToken.PROGRAM);
-	
-	inicio=_etq;
-	//parchear la dirección del procedimiento en la tabla asociada al procedimiento para posibles llamadas recursivas
-	_ts.getRegistroTabla(id).setInicio(inicio);
-	
-	prologo(_nivel,_tamDatosLocales);
-	_etq += longPrologo;
-	
-	Sentencias();
-	emparejaToken( TipoToken.LLAVECLA);	
-	//aqui tengo que parchear seguro con el inicio
-	//parcheo +11
-
-	epilogo(_nivel);
-	_instrucciones.add(new InstruccionIRIND());
-	_etq = _etq + longEpilogo + 1;
-	
-	return inicio;
-
-}
-
-
-
-public void Sentencias() throws Error{		
-			
-	ListaSents();
-}
-
-
-
-
-
-
-public void ListaSents() throws Error{		
-	if (_tokenActual.getTipo()==TipoToken.ID ||
-			_tokenActual.getTipo()==TipoToken.READ ||
-			_tokenActual.getTipo()==TipoToken.WRITE ||
-			_tokenActual.getTipo()==TipoToken.FOR||
-			_tokenActual.getTipo()==TipoToken.IF ||
-			_tokenActual.getTipo()==TipoToken.WHILE){
+	public void ListaSents() throws Error {
+		if (_tokenActual.getTipo() == TipoToken.ID
+				|| _tokenActual.getTipo() == TipoToken.READ
+				|| _tokenActual.getTipo() == TipoToken.WRITE
+				|| _tokenActual.getTipo() == TipoToken.FOR
+				|| _tokenActual.getTipo() == TipoToken.NEW
+				|| _tokenActual.getTipo() == TipoToken.DISPOSE
+				|| _tokenActual.getTipo() == TipoToken.IF
+				|| _tokenActual.getTipo() == TipoToken.WHILE) {
 
 			Instr();
 			ListaSents();
-		}		
-}
+		}
+	}
 
+	public void inicio(int numNiveles, int tamDatosLocales) {
 
-	
-public void inicio(int numNiveles, int tamDatosLocales){
-		
-		_instrucciones.add(new InstruccionAPILA(numNiveles+1));
+		_instrucciones.add(new InstruccionAPILA(numNiveles + 1));
 		_instrucciones.add(new InstruccionDESAPILADIR(1));
-		_instrucciones.add(new InstruccionAPILA(1+numNiveles+tamDatosLocales));
+		_instrucciones.add(new InstruccionAPILA(1 + numNiveles
+				+ tamDatosLocales));
 		_instrucciones.add(new InstruccionDESAPILADIR(0));
-}
+	}
 
-public void prologo(int nivel, int tamDatosLocales){
+	public void prologo(int nivel, int tamDatosLocales) {
 		_instrucciones.add(new InstruccionAPILADIR(0));
 		_instrucciones.add(new InstruccionAPILA(2));
 		_instrucciones.add(new InstruccionSUMA());
-		_instrucciones.add(new InstruccionAPILADIR(1+nivel));
+		_instrucciones.add(new InstruccionAPILADIR(1 + nivel));
 		_instrucciones.add(new InstruccionDESAPILAIND());
 		_instrucciones.add(new InstruccionAPILADIR(0));
 		_instrucciones.add(new InstruccionAPILA(3));
 		_instrucciones.add(new InstruccionSUMA());
-		_instrucciones.add(new InstruccionDESAPILADIR(1+nivel));
+		_instrucciones.add(new InstruccionDESAPILADIR(1 + nivel));
 		_instrucciones.add(new InstruccionAPILADIR(0));
-		_instrucciones.add(new InstruccionAPILA(tamDatosLocales+2));
+		_instrucciones.add(new InstruccionAPILA(tamDatosLocales + 2));
 		_instrucciones.add(new InstruccionSUMA());
 		_instrucciones.add(new InstruccionDESAPILADIR(0));
-}
+	}
 
-public void epilogo(int nivel){
-	_instrucciones.add(new InstruccionAPILADIR(1+nivel));
-	_instrucciones.add(new InstruccionAPILA(2));
-	_instrucciones.add(new InstruccionRESTA());
-	_instrucciones.add(new InstruccionAPILAIND());
-	_instrucciones.add(new InstruccionAPILADIR(1+nivel));
-	_instrucciones.add(new InstruccionAPILA(3));
-	_instrucciones.add(new InstruccionRESTA());
-	_instrucciones.add(new InstruccionCOPIA());
-	_instrucciones.add(new InstruccionDESAPILADIR(0));
-	_instrucciones.add(new InstruccionAPILA(2));
-	_instrucciones.add(new InstruccionSUMA());
-	_instrucciones.add(new InstruccionAPILAIND());
-	_instrucciones.add(new InstruccionDESAPILADIR(1+nivel));
-}
-
-public void inicioPaso(){
-	_instrucciones.add(new InstruccionAPILADIR(0));
-	_instrucciones.add(new InstruccionAPILA(3));
-	_instrucciones.add(new InstruccionSUMA());
-}
-
-public void apilaRet(int ret){
-	_instrucciones.add(new InstruccionAPILADIR(0));
-	_instrucciones.add(new InstruccionAPILA(1));
-	_instrucciones.add(new InstruccionSUMA());
-	_instrucciones.add(new InstruccionAPILA(ret));
-	_instrucciones.add(new InstruccionDESAPILAIND());
-}
-
-	public void accesoVar(RegistroTabla infoID){
-	_instrucciones.add(new InstruccionAPILADIR(1+infoID.getNivel()));
-	_instrucciones.add(new InstruccionAPILA(infoID.getDir()));
-	_instrucciones.add(new InstruccionSUMA());
-	if (infoID.getClase() == EClase.PVAR){
+	public void epilogo(int nivel) {
+		_instrucciones.add(new InstruccionAPILADIR(1 + nivel));
+		_instrucciones.add(new InstruccionAPILA(2));
+		_instrucciones.add(new InstruccionRESTA());
 		_instrucciones.add(new InstruccionAPILAIND());
+		_instrucciones.add(new InstruccionAPILADIR(1 + nivel));
+		_instrucciones.add(new InstruccionAPILA(3));
+		_instrucciones.add(new InstruccionRESTA());
+		_instrucciones.add(new InstruccionCOPIA());
+		_instrucciones.add(new InstruccionDESAPILADIR(0));
+		_instrucciones.add(new InstruccionAPILA(2));
+		_instrucciones.add(new InstruccionSUMA());
+		_instrucciones.add(new InstruccionAPILAIND());
+		_instrucciones.add(new InstruccionDESAPILADIR(1 + nivel));
 	}
-	
-}
 
-public int longAccesoVar(RegistroTabla infoID){
-	if (infoID.getClase() == EClase.PVAR){
-		return 4;
+	public void inicioPaso() {
+		_instrucciones.add(new InstruccionAPILADIR(0));
+		_instrucciones.add(new InstruccionAPILA(3));
+		_instrucciones.add(new InstruccionSUMA());
 	}
-	else{
-		return 3;
-	}
-}
 
-public void direccionParFormal(Parametro pFormal){
-	_instrucciones.add(new InstruccionAPILA(pFormal.getDir()));
-	_instrucciones.add(new InstruccionSUMA());
-}
-
-public void finPaso(){
-	_instrucciones.add(new InstruccionDESAPILA());		
-}
-
-public void pasoParametro(EModo modoReal,Parametro pFormal){
-	if (pFormal.getModo() == EModo.VALOR && modoReal == EModo.VARIABLE){
-		_instrucciones.add(new InstruccionMUEVE(pFormal.getTipo().getTam()));
-	}
-	else{
+	public void apilaRet(int ret) {
+		_instrucciones.add(new InstruccionAPILADIR(0));
+		_instrucciones.add(new InstruccionAPILA(1));
+		_instrucciones.add(new InstruccionSUMA());
+		_instrucciones.add(new InstruccionAPILA(ret));
 		_instrucciones.add(new InstruccionDESAPILAIND());
 	}
-}
 
-
-public void parchea(int etqInstruccion, int operando){
-	InstruccionConOperando i = (InstruccionConOperando) _instrucciones.get(etqInstruccion);
-	i.setOperando(operando);				
-}
-
-
-public Tipo Mem(Token tokenid) throws Error{
-	String id;
-	if (tokenid!=null)
-	 id= tokenid.getLexema();
-	else {id=this._tokenActual.getLexema();
-		emparejaToken(TipoToken.ID);
-	}
-	Tipo tipo_aux = tipoDeID(id);
-	accesoVar(_ts.getRegistroTabla(id));
-	_etq+=longAccesoVar(_ts.getRegistroTabla(id));
-	return RMem(tipo_aux);		
-}
-
-public Tipo RMem(Tipo tipo1) throws Error{
-	if (_tokenActual.getTipo()==TipoToken.PUNTO){
-		emparejaToken(TipoToken.PUNTO);
-		String id = _tokenActual.getLexema();
-		emparejaToken(TipoToken.ID);
-		Tipo tipo2 = tipoDeCampo(id, tipo1);
-		_instrucciones.add(new InstruccionAPILA(tipo1.getCampo(id).getDesp()));
+	public void accesoVar(RegistroTabla infoID) {
+		_instrucciones.add(new InstruccionAPILADIR(1 + infoID.getNivel()));
+		_instrucciones.add(new InstruccionAPILA(infoID.getDir()));
 		_instrucciones.add(new InstruccionSUMA());
-		_etq = _etq + 2;
-		return RMem(tipo2);
+		if (infoID.getClase() == EClase.PVAR) {
+			_instrucciones.add(new InstruccionAPILAIND());
+		}
+
 	}
-	else if (_tokenActual.getTipo()==TipoToken.CORAP){
-		emparejaToken(TipoToken.CORAP);
-		boolean parh = false;
-		Tipo tipo2 = Exp(parh).getTipo();
-		emparejaToken(TipoToken.CORCLA);
-		Tipo tipo3 = tipoDeTBase(tipo1, tipo2);
-		_instrucciones.add(new InstruccionAPILA(tipo1.getTbase().getTam()));
-		_instrucciones.add(new InstruccionMULT());
-		_instrucciones.add(new InstruccionSUMA());
-		_etq = _etq + 3;
-		return RMem(tipo3);
-	}
-	else
-		return tipo1;
-}
 
-
-public Tipo tipoDeID(String id) throws Error{
-	if (_ts.existeId(id))
-		if (_ts.getClase(id) == EClase.VAR || _ts.getClase(id) == EClase.PVAR)
-			return referencia(_ts.getTipo(id));
-		else
-			throw new Error("tipoDeID: Identificador " + id + " no es de tipo VAR. " + _tokenActual.toString());
-	else
-		throw new Error("tipoDeID: Identificador " + id + " no definido. " + _tokenActual.toString());		
-}
-
-public Tipo tipoDeTBase(Tipo tipo1, Tipo tipo2) throws Error{
-	if (tipo1.getTipo() == ETipo.ARRAY && tipo2.getTipo() == ETipo.NATURAL)
-		return referencia(tipo1.getTbase());
-	else
-		throw new Error("tipoDeTBase: Identificadores para array no del tipo ARRAY e INTEGER. " + _tokenActual.toString());
-}
-
-public Tipo tipoDeCampo(String id, Tipo tipo) throws Error{
-	if (tipo.getTipo() == ETipo.RECORD)
-		if (existeCampo(id, tipo.getCampos()))
-			return referencia(tipo.getCampo(id).getTipo());
-		else
-			throw new Error("tipoDeCampo: Identificador " + id + " no es un campo del registro. " + _tokenActual.toString());
-	else
-		throw new Error("tipoDeCampo: Identificador no es de tipo REG. " + _tokenActual.toString());
-}
-
-
-public Tipo referencia(Tipo tipo){
-	if (tipo.getTipo()==ETipo.REF)
-		if (_ts.existeId(tipo.getId()))
-			return referencia(_ts.getTipo(tipo.getId()));
-		else
-			return new Tipo(ETipo.ERR);
-	else
-		return tipo;
-}
-
-
-///////////////////////////////////////////////////////////////	
-/*
-public void RDecs() throws Error {
-		if (_tokenActual.getTipo() == TipoToken.ID) {
-			Token _tokenTmp = _tokenActual;
-			DecResp dr = Dec();
-			if (!_ts.existeId(dr.getNombre())) {
-				_ts.anadeId(dr.getNombre(), dr.getTipo());
-				RDecs();
-			} else
-				throw new Error("Identificador duplicado. "
-						+ _tokenTmp.toString());
+	public int longAccesoVar(RegistroTabla infoID) {
+		if (infoID.getClase() == EClase.PVAR) {
+			return 4;
+		} else {
+			return 3;
 		}
 	}
 
-	// _tokenActual -> TokenId
-	public DecResp Dec() throws Error {
-		String lex = _tokenActual.getLexema();
-		TipoInstruccion tipo;
-		emparejaToken(TipoToken.ID);
-		emparejaToken(TipoToken.DOSPUNTOS);
-		tipo = Tipo1();
-		emparejaToken(TipoToken.SEPARADOR);
-		return new DecResp(lex, tipo);
+	public void direccionParFormal(Parametro pFormal) {
+		_instrucciones.add(new InstruccionAPILA(pFormal.getDir()));
+		_instrucciones.add(new InstruccionSUMA());
 	}
-/*
-	public TipoInstruccion Tipo() throws Error {
-		TipoInstruccion tipo = null;
-		if (_tokenActual.getTipo() == TipoToken.INTEGER) {
-			tipo = TipoInstruccion.INTEGER;
-			emparejaToken(TipoToken.INTEGER);
-		} else if (_tokenActual.getTipo() == TipoToken.BOOLEAN) {
-			tipo = TipoInstruccion.BOOLEAN;
-			emparejaToken(TipoToken.BOOLEAN);
-		} else if (_tokenActual.getTipo() == TipoToken.NATURAL) {
-			tipo = TipoInstruccion.NATURAL;
-			emparejaToken(TipoToken.NATURAL);
-		} else if (_tokenActual.getTipo() == TipoToken.FLOAT) {
-			tipo = TipoInstruccion.FLOAT;
-			emparejaToken(TipoToken.FLOAT);
-		} else if (_tokenActual.getTipo() == TipoToken.CHARACTER) {
-			tipo = TipoInstruccion.CHARACTER;
-			emparejaToken(TipoToken.CHARACTER);
+
+	public void finPaso() {
+		_instrucciones.add(new InstruccionDESAPILA());
+	}
+
+	public void pasoParametro(EModo modoReal, Parametro pFormal) {
+		if (pFormal.getModo() == EModo.VALOR && modoReal == EModo.VARIABLE) {
+			_instrucciones
+					.add(new InstruccionMUEVE(pFormal.getTipo().getTam()));
+		} else {
+			_instrucciones.add(new InstruccionDESAPILAIND());
+		}
+	}
+
+	public void parchea(int etqInstruccion, int operando) {
+		InstruccionConOperando i = (InstruccionConOperando) _instrucciones
+				.get(etqInstruccion);
+		i.setOperando(operando);
+	}
+
+	public Tipo Mem(Token tokenid) throws Error {
+		String id;
+		if (tokenid != null)
+			id = tokenid.getLexema();
+		else {
+			id = this._tokenActual.getLexema();
+			emparejaToken(TipoToken.ID);
+		}
+		Tipo tipo_aux = tipoDeID(id);
+		accesoVar(_ts.getRegistroTabla(id));
+		_etq += longAccesoVar(_ts.getRegistroTabla(id));
+		return RMem(tipo_aux);
+	}
+
+	public Tipo RMem(Tipo tipo1) throws Error {
+		if (_tokenActual.getTipo() == TipoToken.PUNTO) {
+			emparejaToken(TipoToken.PUNTO);
+			String id = _tokenActual.getLexema();
+			emparejaToken(TipoToken.ID);
+			Tipo tipo2 = tipoDeCampo(id, tipo1);
+			_instrucciones.add(new InstruccionAPILA(tipo1.getCampo(id)
+					.getDesp()));
+			_instrucciones.add(new InstruccionSUMA());
+			_etq = _etq + 2;
+			return RMem(tipo2);
+		} else if (_tokenActual.getTipo() == TipoToken.CORAP) {
+			emparejaToken(TipoToken.CORAP);
+			boolean parh = false;
+			Tipo tipo2 = Exp(parh).getTipo();
+			emparejaToken(TipoToken.CORCLA);
+			Tipo tipo3 = tipoDeTBase(tipo1, tipo2);
+			_instrucciones.add(new InstruccionAPILA(tipo1.getTbase().getTam()));
+			_instrucciones.add(new InstruccionMULT());
+			_instrucciones.add(new InstruccionSUMA());
+			_etq = _etq + 3;
+			return RMem(tipo3);
+		} 
+		else if (_tokenActual.getTipo() == TipoToken.PUNTERO) {
+			emparejaToken(TipoToken.PUNTERO);
+			
+			
+			
+			 
+			
+			//añadir instrucciones para que vaya a la memoriarera
+			_instrucciones.add(new InstruccionPUNTERO());
+			_instrucciones.add(new InstruccionPUNTERO());
+			_instrucciones.add(new InstruccionPUNTERO());
+			return RMem(this.tipoDeTBase(tipo1));
+			//TODO instrucciones
+			//TODO instruciones
+			//TODO etiquetas ++
+			
 		} else
+			return tipo1;
+	}
+
+	public Tipo tipoDeID(String id) throws Error {
+		if (_ts.existeId(id))
+			if (_ts.getClase(id) == EClase.VAR
+					|| _ts.getClase(id) == EClase.PVAR)
+				return referencia(_ts.getTipo(id));
+			else
+				throw new Error("tipoDeID: Identificador " + id
+						+ " no es de tipo VAR. " + _tokenActual.toString());
+		else
+			throw new Error("tipoDeID: Identificador " + id + " no definido. "
+					+ _tokenActual.toString());
+	}
+
+	public Tipo tipoDeTBase(Tipo tipo1, Tipo tipo2) throws Error {
+		if (tipo1.getTipo() == ETipo.ARRAY && tipo2.getTipo() == ETipo.NATURAL)
+			return referencia(tipo1.getTbase());
+		else
 			throw new Error(
-					"Tipo: Se esperaba una palabra reservada INTEGER o FLOAT o BOOLEAN o CHAR y no "
-							+ _tokenActual.toString() + ")");
-
-		return tipo;
+					"tipoDeTBase: Identificadores para array no del tipo ARRAY e INTEGER. "
+							+ _tokenActual.toString());
+	}
+	
+	public Tipo tipoDeTBase(Tipo tipo1) throws Error {
+		if (tipo1.getTipo() == ETipo.POINTER)
+			return referencia(tipo1.getTbase());
+		else
+			throw new Error(
+					"tipoDeTBase: Identificadores para un puntero no es de tipo puntero. "
+							+ _tokenActual.toString());
 	}
 
-	public void Sents() throws Error {
-		Instr();
-		RSents();
+	public Tipo tipoDeCampo(String id, Tipo tipo) throws Error {
+		if (tipo.getTipo() == ETipo.RECORD)
+			if (existeCampo(id, tipo.getCampos()))
+				return referencia(tipo.getCampo(id).getTipo());
+			else
+				throw new Error("tipoDeCampo: Identificador " + id
+						+ " no es un campo del registro. "
+						+ _tokenActual.toString());
+		else
+			throw new Error("tipoDeCampo: Identificador no es de tipo REG. "
+					+ _tokenActual.toString());
 	}
 
-	public void RSents() throws Error {
-		if (_tokenActual.getTipo() == TipoToken.ID
-				|| _tokenActual.getTipo() == TipoToken.READ
-				|| _tokenActual.getTipo() == TipoToken.WRITE) {
-			Instr();
-			RSents();
-		}
+	public Tipo referencia(Tipo tipo) {
+		if (tipo.getTipo() == ETipo.REF)
+			if (_ts.existeId(tipo.getId()))
+				return referencia(_ts.getTipo(tipo.getId()));
+			else
+				return new Tipo(ETipo.ERR);
+		else
+			return tipo;
 	}
-*/
+
 
 
 	public void Instr() throws Error {
-		
-		
-		
-		if (_tokenActual.getTipo()==TipoToken.ID)
+
+		if (_tokenActual.getTipo() == TipoToken.ID)
 			InstrId();
-			
-		else if (_tokenActual.getTipo()==TipoToken.READ)		
+
+		else if (_tokenActual.getTipo() == TipoToken.READ)
 			InstrLect();
-		else if (_tokenActual.getTipo()==TipoToken.WRITE)		
+		else if (_tokenActual.getTipo() == TipoToken.WRITE)
 			InstrEsc();
-		
-		else if (_tokenActual.getTipo()==TipoToken.IF)		
+
+		else if (_tokenActual.getTipo() == TipoToken.IF)
 			InstrIf();
-		else if (_tokenActual.getTipo()==TipoToken.WHILE)		
+		else if (_tokenActual.getTipo() == TipoToken.WHILE)
 			InstrWhile();
-		else if (_tokenActual.getTipo()==TipoToken.FOR)		
+		else if (_tokenActual.getTipo() == TipoToken.FOR)
 			InstrFor();
-		/*else if (_tokenActual.getTipo()==TipoToken.NEW)		
-			InstrNew();
-		else if (_tokenActual.getTipo()==TipoToken.DISPOSE)		
-			InstrDis();
-			*/
+		
+		  else if (_tokenActual.getTipo()==TipoToken.NEW) InstrNew(); else if
+		  (_tokenActual.getTipo()==TipoToken.DISPOSE) InstrDis();
+		 
 		else
 			throw new Error(
 					"Instr: Se esperaba tokenID, tokenREAD o tokenWRITE. "
 							+ _tokenActual.toString());
 	}
 
-	public void InstrIf() throws Error{
-		//REVISAR CIRCUITO CORTO
+	private void InstrDis() throws Error {
+		emparejaToken(TipoToken.DISPOSE);
+		emparejaToken(TipoToken.ID);
+		emparejaToken(TipoToken.SEPARADOR);
+		_instrucciones.add(new InstruccionDISPOSE());
+		_etq++;
+		_instrucciones.add(new InstruccionDISPOSE());
+		_etq++;
+		// TODO hacer dispose
+		
+	}
+
+	private void InstrNew() throws Error {
+		emparejaToken(TipoToken.NEW);
+		emparejaToken(TipoToken.ID);
+		emparejaToken(TipoToken.SEPARADOR);
+		
+		_instrucciones.add(new InstruccionNEW());
+		_etq++;
+		_instrucciones.add(new InstruccionNEW());
+		_etq++;
+		// TODO hacer new
+		
+	}
+
+	public void InstrIf() throws Error {
+		// REVISAR CIRCUITO CORTO
 		emparejaToken(TipoToken.IF);
-		boolean parh=false;
+		boolean parh = false;
 		Tipo tipo = Exp(parh).getTipo();
-		if (tipo.getTipo() == ETipo.BOOLEAN){
+		if (tipo.getTipo() == ETipo.BOOLEAN) {
 			emparejaToken(TipoToken.THEN);
-			int etq1 = _etq;	
+			int etq1 = _etq;
 			_instrucciones.add(new InstruccionIRF(valorIndefinido));
 			_etq++;
 			InsComp();
@@ -790,138 +763,146 @@ public void RDecs() throws Error {
 			parchea(etq1, _etq);
 			PElse();
 			parchea(etq2, _etq);
-		}
-		else
-			throw new Error("InstrIf: El tipo de la expresión no es BOOLEAN.");	
+		} else
+			throw new Error("InstrIf: El tipo de la expresión no es BOOLEAN.");
 	}
-	
-	public void PElse() throws Error{
-		if (_tokenActual.getTipo()==TipoToken.ELSE){
+
+	public void PElse() throws Error {
+		if (_tokenActual.getTipo() == TipoToken.ELSE) {
 			emparejaToken(TipoToken.ELSE);
-			InsComp();	
+			InsComp();
 		}
 	}
-	
-	public void InstrWhile() throws Error{
-		//REVISAR CIRCUITO CORTO
+
+	public void InstrWhile() throws Error {
+		// REVISAR CIRCUITO CORTO
 		emparejaToken(TipoToken.WHILE);
 		int etq1 = _etq;
-		boolean parh=false;
+		boolean parh = false;
 		Tipo tipo = Exp(parh).getTipo();
-		if (tipo.getTipo() == ETipo.BOOLEAN){
-			emparejaToken(TipoToken.DO);			
+		if (tipo.getTipo() == ETipo.BOOLEAN) {
+			emparejaToken(TipoToken.DO);
 			_instrucciones.add(new InstruccionIRF(valorIndefinido));
 			int etq2 = _etq;
 			_etq++;
-			InsComp();			
+			InsComp();
 			_instrucciones.add(new InstruccionIRA(etq1));
 			_etq++;
 			parchea(etq2, _etq);
-		}
-		else
-			throw new Error("InstrWhile: El tipo de la expresión no es BOOLEAN.");	
-	}
-	
-	public void InstrFor() throws Error{
-		//REVISAR CIRCUITO CORTO
-		emparejaToken(TipoToken.FOR);
-		//..
-		//..
-		//Exp0 y Exp1
-		//if (tipo.getTipo() == ETipo.BOOLEAN){
-		emparejaToken(TipoToken.DO);
-		
-		//}
-		//else
-			//throw new Error("InstrFor: El tipo de la expresión no es BOOLEAN.");
+		} else
+			throw new Error(
+					"InstrWhile: El tipo de la expresión no es BOOLEAN.");
 	}
 
-	public void InsComp() throws Error{
-		if (_tokenActual.getTipo()==TipoToken.CORAP)
-		{
-			emparejaToken(TipoToken.CORAP);
+	public void InstrFor() throws Error {
+		// REVISAR CIRCUITO CORTO
+		emparejaToken(TipoToken.FOR);
+		// ..
+		// ..
+		// Exp0 y Exp1
+		// if (tipo.getTipo() == ETipo.BOOLEAN){
+		emparejaToken(TipoToken.DO);
+
+		// }
+		// else
+		// throw new Error("InstrFor: El tipo de la expresión no es BOOLEAN.");
+	}
+
+	public void InsComp() throws Error {
+		if (_tokenActual.getTipo() == TipoToken.LLAVEAP) {
+			emparejaToken(TipoToken.LLAVEAP);
 			Sentencias();
-			emparejaToken(TipoToken.CORCLA);
-		}
-		else
+			emparejaToken(TipoToken.LLAVECLA);
+		} else
 			Instr();
 	}
 
 	public void InstrId() throws Error {
-		Token tokenid= new Token(_tokenActual.getNumLinea(),_tokenActual.getNumColumna(),_tokenActual.getLexema(),_tokenActual.getTipo());
+		Token tokenid = new Token(_tokenActual.getNumLinea(), _tokenActual
+				.getNumColumna(), _tokenActual.getLexema(), _tokenActual
+				.getTipo());
 		emparejaToken(TipoToken.ID);
-		if (_tokenActual.getTipo()==TipoToken.ASIG ||
-				_tokenActual.getTipo()==TipoToken.PUNTO ||
-				_tokenActual.getTipo()==TipoToken.CORAP)
-				InstrAsig(tokenid);
-			else
-				InstrCall(tokenid);
-	
-}
-	
-	public void InstrCall(Token tokenid) throws Error{
+		if (_tokenActual.getTipo() == TipoToken.ASIG
+				|| _tokenActual.getTipo() == TipoToken.PUNTO
+				|| _tokenActual.getTipo() == TipoToken.PUNTERO
+				|| _tokenActual.getTipo() == TipoToken.CORAP)
+			InstrAsig(tokenid);
+		else
+			InstrCall(tokenid);
+
+	}
+
+	public void InstrCall(Token tokenid) throws Error {
 		int etq2;
 		String id;
-		if (tokenid!=null)
-		id = tokenid.getLexema();
+		if (tokenid != null)
+			id = tokenid.getLexema();
 		else {
-			id=this._tokenActual.getLexema();
-		emparejaToken(TipoToken.ID);
+			id = this._tokenActual.getLexema();
+			emparejaToken(TipoToken.ID);
 		}
-		if (_ts.existeId(id) && _ts.getClase(id) == EClase.PROC){
+		if (_ts.existeId(id) && _ts.getClase(id) == EClase.PROC) {
 			apilaRet(valorIndefinido);
-			etq2 = _etq + 3;		
-			_etq+= longApilaRet;
+			etq2 = _etq + 3;
+			_etq += longApilaRet;
 			RParams(_ts.getTipo(id).getParametros());
 			_instrucciones.add(new InstruccionIRA(_ts.getInicio(id)));
 			_etq++;
-			parchea(etq2,_etq);
+			parchea(etq2, _etq);
 			emparejaToken(TipoToken.SEPARADOR);
-		}
-		else throw new Error("InstrCall: Identificador '" + id + "' no definido o no de clase 'proc'.");	
+		} else
+			throw new Error("InstrCall: Identificador '" + id
+					+ "' no definido o no de clase 'proc'.");
 
 	}
-	
-	public void RParams(Vector <Parametro> params) throws Error{
-		if (_tokenActual.getTipo()==TipoToken.PARAP){
-			emparejaToken( TipoToken.PARAP);
+
+	public void RParams(Vector<Parametro> params) throws Error {
+		
+			emparejaToken(TipoToken.PARAP);
+		if (_tokenActual.getTipo() != TipoToken.PARCLA)	
+		{
 			inicioPaso();
 			_etq += longInicioPaso;
 			int nparams = LRParams(params);
-			if (params.size() == nparams){
+			if (params.size() == nparams) {
 				finPaso();
 				_etq += longFinPaso;
-				emparejaToken( TipoToken.PARCLA);
-			}
-			else throw new Error("RParams: Número de parámetros reales(" + String.valueOf(nparams) + ") no corresponde con número de parámetros formales (" + String.valueOf(params.size()) + ")");
-		}
-		else
-			if (params.size() != 0) throw new Error("RParams: Número de parámetros reales no corresponde con número de parámetros formales (" + String.valueOf(params.size()) + ")");
+				emparejaToken(TipoToken.PARCLA);
+			} else
+				throw new Error(
+						"RParams: Número de parámetros reales("
+								+ String.valueOf(nparams)
+								+ ") no corresponde con número de parámetros formales ("
+								+ String.valueOf(params.size()) + ")");
+		} else if (params.size() != 0)
+			throw new Error(
+					"RParams: Número de parámetros reales no corresponde con número de parámetros formales ("
+							+ String.valueOf(params.size()) + ")");
+		else emparejaToken(TipoToken.PARCLA);
 	}
-	
-	public int LRParams(Vector <Parametro> params) throws Error{
+
+	public int LRParams(Vector<Parametro> params) throws Error {
+		
+		
 		_instrucciones.add(new InstruccionCOPIA());
 		_etq++;
 		boolean parh = true;
 		Resp resp = Exp(parh);
-		pasoParametro(resp.getModo(),params.get(0));
+		pasoParametro(resp.getModo(), params.get(0));
 		_etq = _etq + longPasoParametro;
 
-		
-		if (params.size() == 0 || 
-			params.get(0).getModo() == EModo.VARIABLE && resp.getModo() == EModo.VALOR 
-			|| !compatibles(params.get(0).getTipo(), resp.getTipo()))
+		if (params.size() == 0 || params.get(0).getModo() == EModo.VARIABLE
+				&& resp.getModo() == EModo.VALOR
+				|| !compatibles(params.get(0).getTipo(), resp.getTipo()))
 			throw new Error("LRParams: ERROR");
 		else
-			
-			
-		return RLRParams(params, 1);
-		}
 
-	
-	public int RLRParams(Vector <Parametro> params, int nparams) throws Error{
-		if (_tokenActual.getTipo() == TipoToken.COMA){
-			emparejaToken( TipoToken.COMA);
+			return RLRParams(params, 1);
+	}
+
+	public int RLRParams(Vector<Parametro> params, int nparams) throws Error {
+		if (_tokenActual.getTipo() == TipoToken.COMA) {
+			emparejaToken(TipoToken.COMA);
 			_instrucciones.add(new InstruccionCOPIA());
 			direccionParFormal(params.get(nparams));
 			_etq = _etq + longDireccionParFormal + 1;
@@ -929,42 +910,34 @@ public void RDecs() throws Error {
 			Resp resp = Exp(parh);
 			pasoParametro(resp.getModo(), params.get(nparams));
 			_etq += longPasoParametro;
-			
-			
-			if (nparams > params.size() ||
-			params.get(nparams).getModo() == EModo.VARIABLE && resp.getModo() == EModo.VALOR 
-			|| !compatibles(params.get(nparams).getTipo(), resp.getTipo()))
+
+			if (nparams > params.size()
+					|| params.get(nparams).getModo() == EModo.VARIABLE
+					&& resp.getModo() == EModo.VALOR
+					|| !compatibles(params.get(nparams).getTipo(), resp
+							.getTipo()))
 				throw new Error("RLRParams: ERROR");
-			else	
-			return RLRParams(params, nparams+1);
-		
-			
-		}
-		else{
+			else
+				return RLRParams(params, nparams + 1);
+
+		} else {
 			return nparams;
 		}
-		
-	}
 
+	}
 
 	// _tokenpasado -> tokenId
 	public void InstrAsig(Token tokenid) throws Error {
-		
+
 		Tipo tipo1 = Mem(tokenid);
 		emparejaToken(TipoToken.ASIG);
-		boolean parh=false;
+		boolean parh = false;
 		Tipo tipo2 = Exp(parh).getTipo();
-		
-		
-		//TODO fallaasig() es lo que tenia antes
-		//TODO tengo que hacerme la compatibilidad
-		
-		//WILLY Aquí mete MUEVES en vez de DESAPILAS!! Hay que añadir tipos de compatibilidad, no se si los tipos de operadores tb ¿?
-		
+
 		if (compatibles(tipo1,tipo2)){
 			if (compatibles(tipo1, new Tipo(ETipo.INTEGER)) || 
 				compatibles(tipo1, new Tipo(ETipo.BOOLEAN))
-				|| /*Nacho*/
+				|| 
 				compatibles(tipo1, new Tipo(ETipo.NATURAL))
 				||
 				compatibles(tipo1, new Tipo(ETipo.FLOAT))
@@ -977,49 +950,40 @@ public void RDecs() throws Error {
 				_instrucciones.add(new InstruccionMUEVE(tipo1.getTam()));
 			_etq++;
 			emparejaToken(TipoToken.SEPARADOR);
-		}
-		else
-			throw new Error("InstrAsig: Tipos no compatibles " + _tokenActual.toString());				
-	
-		
-		
+		} else
+			throw new Error("InstrAsig: Tipos no compatibles "
+					+ _tokenActual.toString());
 
 	}
 
 	// _tokenActual -> TokenREAD
 	public void InstrLect() throws Error {
-		
-		
+
 		emparejaToken(TipoToken.READ);
 		emparejaToken(TipoToken.PARAP);
 		Tipo tipo = Mem(null);
 		_instrucciones.add(new InstruccionIN());
 		_etq++;
-		if (tipo.getTipo()!=ETipo.ERR){
+		if (tipo.getTipo() != ETipo.ERR) {
 			_instrucciones.add(new InstruccionDESAPILAIND());
 			_etq++;
 			emparejaToken(TipoToken.PARCLA);
 			emparejaToken(TipoToken.SEPARADOR);
-		}			
-		else
-			throw new Error("InstrLect: Tipo de Mem = ERR " + _tokenActual.toString());
-	
-		
-/*		
-		if (_tokenActual.getTipo() == TipoToken.ID) {
-			String lex = _tokenActual.getLexema();
-			if (!_ts.existeId(lex))
-				throw new Error("InstrLect: Identificador no decladaro. "
-						+ _tokenActual.toString());
-			emparejaToken(TipoToken.ID);
-			emparejaToken(TipoToken.PARCLA);
-			emparejaToken(TipoToken.SEPARADOR);
-			_instrucciones.add(new InstruccionIN());
-			_instrucciones.add(new InstruccionDESAPILADIR(_ts.dameDir(lex)));
 		} else
-			throw new Error("InstrLect: Se esperaba tokenID y no "
+			throw new Error("InstrLect: Tipo de Mem = ERR "
 					+ _tokenActual.toString());
-*/
+
+		/*
+		 * if (_tokenActual.getTipo() == TipoToken.ID) { String lex =
+		 * _tokenActual.getLexema(); if (!_ts.existeId(lex)) throw new
+		 * Error("InstrLect: Identificador no decladaro. " +
+		 * _tokenActual.toString()); emparejaToken(TipoToken.ID);
+		 * emparejaToken(TipoToken.PARCLA); emparejaToken(TipoToken.SEPARADOR);
+		 * _instrucciones.add(new InstruccionIN()); _instrucciones.add(new
+		 * InstruccionDESAPILADIR(_ts.dameDir(lex))); } else throw new
+		 * Error("InstrLect: Se esperaba tokenID y no " +
+		 * _tokenActual.toString());
+		 */
 	}
 
 	// _tokenActual -> TokenWRITE
@@ -1038,16 +1002,13 @@ public void RDecs() throws Error {
 					"InstrEsc: El tipo de la expresión entre paréntesis es ERROR. "
 							+ tokenTmp.toString());
 	}
-	
-	
-	public Resp Exp(boolean parhin) throws Error{
+
+	public Resp Exp(boolean parhin) throws Error {
 		Resp tipoModo;
 		Resp expSimple = ExpSimple(parhin);
-		tipoModo = RExp(expSimple.getTipo(), expSimple.getModo()); 
+		tipoModo = RExp(expSimple.getTipo(), expSimple.getModo());
 		return tipoModo;
 	}
-
-
 
 	public Resp RExp(Tipo tipo1, EModo modo1) throws Error {
 		Resp resp1;
@@ -1059,31 +1020,28 @@ public void RDecs() throws Error {
 				|| _tokenActual.getTipo() == TipoToken.MENORIGUAL
 				|| _tokenActual.getTipo() == TipoToken.MAYORIGUAL) {
 
-			
 			Resp resp = OpComp();
-			resp2 =ExpSimple(false) ;
-			
-		
+			resp2 = ExpSimple(false);
 
-			resp1= new Resp(tipoDeExpComp(tipo1, resp2.getTipo()), EModo.VALOR);;
+			resp1 = new Resp(tipoDeExpComp(tipo1, resp2.getTipo()), EModo.VALOR);
+			;
 
 			_instrucciones.add(resp.getCodigo());
-			this._etq=this._etq+1;
-			
+			this._etq = this._etq + 1;
+
 		} else {
 			resp1 = new Resp(tipo1, modo1);
 		}
 		return resp1;
 	}
 
-	public Resp ExpSimple(boolean parhin) throws Error{
+	public Resp ExpSimple(boolean parhin) throws Error {
 		Resp tipoModo;
 		Resp term = Term(parhin);
-		tipoModo = RExpSimple(term.getTipo(), term.getModo());//equivale a RExpSimple(tipo1);
+		tipoModo = RExpSimple(term.getTipo(), term.getModo());// equivale a
+		// RExpSimple(tipo1);
 		return tipoModo;
 	}
-	
-
 
 	public Resp RExpSimple(Tipo tipo1, EModo modo1) throws Error {
 		Resp resp1;
@@ -1093,17 +1051,17 @@ public void RDecs() throws Error {
 				|| _tokenActual.getTipo() == TipoToken.RESTA
 				/*|| _tokenActual.getTipo() == TipoToken.OR*/) {
 
-			boolean parche=false;
-			
+			boolean parche = false;
+
 			Resp resp = OpAd();
 			resp2 = Term(parche);
-			
+
 			tipofinal = tipoDeExpBin(resp.getTipo(), tipo1, resp2.getTipo());
 
 			_instrucciones.add(resp.getCodigo());
-			this._etq=this._etq+1;
+			this._etq = this._etq + 1;
 
-			resp1 = RExpSimple(tipofinal,  EModo.VALOR);
+			resp1 = RExpSimple(tipofinal, EModo.VALOR);
 
 		} 
 		/*else if (_tokenActual.getTipo() == TipoToken.OR)
@@ -1121,14 +1079,12 @@ public void RDecs() throws Error {
 		}
 		return resp1;
 	}
-	
-
 
 	public Resp Term(boolean parhin) throws Error {
-		
+
 		Resp resp;
 		resp = despl(parhin);
-		resp = RTerm(resp.getTipo(),resp.getModo());
+		resp = RTerm(resp.getTipo(), resp.getModo());
 		return resp;
 	}
 
@@ -1141,15 +1097,16 @@ public void RDecs() throws Error {
 				|| _tokenActual.getTipo() == TipoToken.AND) {
 
 			Resp resp = OpMul();
-			boolean parhc=false;
+			boolean parhc = false;
 			resp2 = despl(parhc);
-			Tipo tipofinal=	tipoDeExpBin(resp.getTipo(),tipo1, resp2.getTipo());
-			resp1 = new Resp (tipofinal, EModo.VALOR);
+			Tipo tipofinal = tipoDeExpBin(resp.getTipo(), tipo1, resp2
+					.getTipo());
+			resp1 = new Resp(tipofinal, EModo.VALOR);
 
 			_instrucciones.add(resp.getCodigo());
 			_etq++;
 
-			resp1 =RTerm(resp1.getTipo(), resp1.getModo());
+			resp1 = RTerm(resp1.getTipo(), resp1.getModo());
 		} else {
 			resp1 = new Resp(tipo1, modo1);
 		}
@@ -1159,12 +1116,11 @@ public void RDecs() throws Error {
 	// voy a poner el modulo y el desplazamiento en la misma produccion
 
 	public Resp despl(boolean parchin) throws Error {
-		
-				
+
 		Resp tipofinal;
 		Resp tipo2;
 		tipo2 = Fact(parchin);
-		tipofinal = Rdespl(tipo2.getTipo(),tipo2.getModo());
+		tipofinal = Rdespl(tipo2.getTipo(), tipo2.getModo());
 		return tipofinal;
 
 	}
@@ -1173,24 +1129,23 @@ public void RDecs() throws Error {
 		Resp respfinal;
 		Resp tipo2;
 		Tipo tipo;
-		
+
 		if (_tokenActual.getTipo() == TipoToken.DESPDER
 				|| _tokenActual.getTipo() == TipoToken.DESPIZQ) {
 
-			
 			Resp aux = opdesp();
 			// tipo2 = OpcionA();
-			boolean parch=false;
+			boolean parch = false;
 			tipo2 = Fact(parch);
 			tipo = tipoDeDespl(tipo1, tipo2.getTipo(), aux.getTipo());
 
 			// _instrucciones.add(aux.getCodigo());
 
-			respfinal = Rdespl(tipo,EModo.VALOR);
+			respfinal = Rdespl(tipo, EModo.VALOR);
 			// creo que la recursion a derechas es solo poner instrucion detras
 			// de esto
 			_instrucciones.add(aux.getCodigo());
-			this._etq=this._etq+1;
+			this._etq = this._etq + 1;
 		} else {
 			respfinal = new Resp(tipo1, modo1);
 		}
@@ -1200,21 +1155,20 @@ public void RDecs() throws Error {
 	public Resp opdesp() throws Error {
 
 		Instruccion codigo = null;
-		Tipo tipo =new Tipo(ETipo.ERR); ;
+		Tipo tipo = new Tipo(ETipo.ERR);
+		;
 		if (_tokenActual.getTipo() == TipoToken.DESPIZQ) {
 			codigo = new InstruccionDESPI();
-			tipo =new Tipo(ETipo.DESP);
+			tipo = new Tipo(ETipo.DESP);
 			emparejaToken(TipoToken.DESPIZQ);
 		} else if (_tokenActual.getTipo() == TipoToken.DESPDER) {
 			codigo = new InstruccionDESPD();
-			tipo =new Tipo(ETipo.DESP);
+			tipo = new Tipo(ETipo.DESP);
 			emparejaToken(TipoToken.DESPDER);
 		}
 
 		return new Resp(codigo, tipo);
 	}
-	
-	
 
 	public Resp Fact(boolean parhin) throws Error {
 		Resp tipoModo;
@@ -1226,24 +1180,20 @@ public void RDecs() throws Error {
 				|| _tokenActual.getTipo() == TipoToken.CASTINGCHAR
 				|| _tokenActual.getTipo() == TipoToken.CASTINGFLOAT
 				|| _tokenActual.getTipo() == TipoToken.CASTINGINT) {
-			
+
 			Resp opUnario = OpUnario();
-			parh=false;
-			fact=Fact(parh);
-			tipoModo = new Resp(tipoDeFact(opUnario.getTipo(),fact.getTipo()),EModo.VALOR);						
+			parh = false;
+			fact = Fact(parh);
+			tipoModo = new Resp(tipoDeFact(opUnario.getTipo(), fact.getTipo()),
+					EModo.VALOR);
 			_instrucciones.add(opUnario.getCodigo());
-			_etq++;	
-			
+			_etq++;
+
 		} else {
 			tipoModo = Atomo(parhin);
 		}
 		return tipoModo;
 	}
-	
-	
-
-	
-	
 
 	public Resp Atomo(boolean parhin) throws Error {
 		Resp resp = null;
@@ -1251,7 +1201,7 @@ public void RDecs() throws Error {
 		if (_tokenActual.getTipo() == TipoToken.INTEGER) {
 			_instrucciones.add(new InstruccionAPILA(Double
 					.parseDouble(_tokenActual.getLexema())));
-			
+
 			resp = new Resp(new Tipo(ETipo.INTEGER), EModo.VALOR);
 			_etq++;
 			emparejaToken(TipoToken.INTEGER);
@@ -1269,7 +1219,7 @@ public void RDecs() throws Error {
 			if (!to.hasMoreElements())
 				_instrucciones.add(new InstruccionAPILA(Double
 						.parseDouble(_tokenActual.getLexema())));
-			
+
 			else {
 				to.nextToken();
 				String a2 = to.nextToken();
@@ -1288,30 +1238,51 @@ public void RDecs() throws Error {
 			resp = new Resp(new Tipo(ETipo.FLOAT), EModo.VALOR);
 			emparejaToken(TipoToken.FLOAT);
 			_etq++;
-		} else if (_tokenActual.getTipo() == TipoToken.CHARACTER) {
+		}
+		else if (_tokenActual.getTipo() == TipoToken.NULL) {
+			//TODO pongo menos -1 xq no tiene ninguna dir de memoria
+			//TODO pongo menos -1 xq no tiene ninguna dir de memoria
+			//TODO pongo menos -1 xq no tiene ninguna dir de memoria
+			_instrucciones.add(new InstruccionAPILA(-1));
+			resp = new Resp(new Tipo(ETipo.NULL), EModo.VALOR);
+			_etq++;
+			emparejaToken(TipoToken.NULL);
+		}
+		
+		else if (_tokenActual.getTipo() == TipoToken.CHARACTER) {
 			_instrucciones.add(new InstruccionAPILA((double) _tokenActual
 					.getLexema().charAt(0)));
 			_etq++;
-			 resp = new Resp(new Tipo(ETipo.CHAR), EModo.VALOR);
+			resp = new Resp(new Tipo(ETipo.CHAR), EModo.VALOR);
 			emparejaToken(TipoToken.CHARACTER);
-		} 
-		
+		}
+
 		else if (_tokenActual.getTipo() == TipoToken.ID) {
 
-			resp = new Resp(Mem(null), EModo.VARIABLE);
-			//TODO yo creo que aqui no hace falta nada parchin aqui lo usa
-			//Compatibilidad
+			//resp = new Resp(Mem(null), EModo.VARIABLE);
+			// TODO yo creo que aqui no hace falta nada parchin aqui lo usa
+			// Compatibilidad
 			/*
-			if ((compatibles(tipo.getTipo(), new Tipo(ETipo.INTEGER)) || 
-				compatibles(tipo.getTipo(), new Tipo(ETipo.BOOLEAN)))&& !parhin){
+			 * if ((compatibles(tipo.getTipo(), new Tipo(ETipo.INTEGER)) ||
+			 * compatibles(tipo.getTipo(), new Tipo(ETipo.BOOLEAN)))&& !parhin){
+			 * _instrucciones.add(new InstruccionAPILAIND()); _etq++;
+			 * 
+			 * }
+			 */
+			
+			resp = new Resp(Mem(null), EModo.VARIABLE);
+			
+			//esto lo hace si es un tipo simple
+			if ((compatibles(resp.getTipo(), new Tipo(ETipo.INTEGER))
+				||compatibles(resp.getTipo(), new Tipo(ETipo.BOOLEAN))
+				||compatibles(resp.getTipo(), new Tipo(ETipo.NATURAL))
+				||compatibles(resp.getTipo(), new Tipo(ETipo.FLOAT))
+				||compatibles(resp.getTipo(), new Tipo(ETipo.CHAR)))&& !parhin){
 				_instrucciones.add(new InstruccionAPILAIND());
 				_etq++;
 				
 			}	
-			*/
-		//!!WILLY, HE SACADO ESTO, MIRA LO DE LA COMPATIBILIDAD!!
-			_instrucciones.add(new InstruccionAPILAIND());
-			_etq++;
+			
 		} else if (_tokenActual.getTipo() == TipoToken.TRUE) {
 			_instrucciones.add(new InstruccionAPILA(1));
 			resp = new Resp(new Tipo(ETipo.BOOLEAN), EModo.VALOR);
@@ -1326,24 +1297,20 @@ public void RDecs() throws Error {
 			emparejaToken(TipoToken.PARAP);
 			resp = Exp(parhin);
 			emparejaToken(TipoToken.PARCLA);
-			
+
 		} else if (_tokenActual.getTipo() == TipoToken.VALORABSO) {
 			emparejaToken(TipoToken.VALORABSO);
 			resp = Exp(parhin);
 			if ((resp.getTipo().getTipo() != ETipo.FLOAT)
 					|| (resp.getTipo().getTipo() != ETipo.INTEGER)
 					|| (resp.getTipo().getTipo() != ETipo.NATURAL))
-				resp=new Resp(new Tipo(ETipo.ERR), EModo.VALOR);
+				resp = new Resp(new Tipo(ETipo.ERR), EModo.VALOR);
 			emparejaToken(TipoToken.VALORABSO);
-		} 
-		
-		
-		else{
-			resp=new Resp(new Tipo(ETipo.ERR), EModo.VALOR);
-		}		
+		}
 
-		
-		
+		else {
+			resp = new Resp(new Tipo(ETipo.ERR), EModo.VALOR);
+		}
 
 		return resp;
 	}
@@ -1353,16 +1320,16 @@ public void RDecs() throws Error {
 		Tipo tipo = null;
 		if (_tokenActual.getTipo() == TipoToken.SUMA) {
 			codigo = new InstruccionSUMA();
-			tipo =new Tipo(ETipo.NUMERICA);
+			tipo = new Tipo(ETipo.NUMERICA);
 			emparejaToken(TipoToken.SUMA);
 		} else if (_tokenActual.getTipo() == TipoToken.RESTA) {
 			codigo = new InstruccionRESTA();
-			tipo =new Tipo(ETipo.NUMERICA);
+			tipo = new Tipo(ETipo.NUMERICA);
 			emparejaToken(TipoToken.RESTA);
 			//vamos a dejar el OR aquí
 		} else if (_tokenActual.getTipo() == TipoToken.OR) {
 			codigo = new InstruccionOR();
-			tipo =new Tipo(ETipo.BOOLEAN);
+			tipo = new Tipo(ETipo.BOOLEAN);
 			emparejaToken(TipoToken.OR);
 		} else {
 			throw new Error(
@@ -1370,7 +1337,6 @@ public void RDecs() throws Error {
 							+ _tokenActual.toString());
 		}
 		return new Resp(codigo, tipo);
-		
 
 	}
 
@@ -1379,23 +1345,23 @@ public void RDecs() throws Error {
 		Tipo tipo = null;
 		if (_tokenActual.getTipo() == TipoToken.MULT) {
 			codigo = new InstruccionMULT();
-			tipo =new Tipo(ETipo.NUMERICA);
+			tipo = new Tipo(ETipo.NUMERICA);
 			emparejaToken(TipoToken.MULT);
 		} else if (_tokenActual.getTipo() == TipoToken.DIV) {
 			codigo = new InstruccionDIV();
-			tipo =new Tipo(ETipo.NUMERICA);
+			tipo = new Tipo(ETipo.NUMERICA);
 			emparejaToken(TipoToken.DIV);
 			//vamos a dejar el AND aquí
 		} else if (_tokenActual.getTipo() == TipoToken.AND) {
 			codigo = new InstruccionAND();
-			tipo =new Tipo(ETipo.BOOLEAN);
+			tipo = new Tipo(ETipo.BOOLEAN);
 			emparejaToken(TipoToken.AND);
-		}//TODO esto va a ir fuera 
-		else if (_tokenActual.getTipo()==TipoToken.PORCEN){				
+		}
+		else if (_tokenActual.getTipo() == TipoToken.PORCEN) {
 			codigo = new InstruccionMOD();
 			tipo = new Tipo(ETipo.MOD);
 			emparejaToken(TipoToken.PORCEN);
-		}else
+		} else
 			throw new Error(
 					"OpMul: Se esperaba tokenMULT, tokenDIV, tokenAND o tokenPORCEN y no "
 							+ _tokenActual.toString());
@@ -1441,7 +1407,7 @@ public void RDecs() throws Error {
 	}
 
 	public Resp OpUnario() throws Error {
-		
+
 		Instruccion codigo = null;
 		Tipo tipo = null;
 		if (_tokenActual.getTipo() == TipoToken.RESTA) {
@@ -1472,7 +1438,6 @@ public void RDecs() throws Error {
 			throw new Error(
 					"OpUnario: Se esperaba tokenRESTA, tokenNOT o un tokenCasting y no "
 							+ _tokenActual.toString());
-		
 
 		return new Resp(codigo, tipo);
 	}
@@ -1487,23 +1452,19 @@ public void RDecs() throws Error {
 
 	//
 
-	public Tipo tipoDeFact(Tipo tOperador,
-			Tipo tOperando)
+	public Tipo tipoDeFact(Tipo tOperador, Tipo tOperando)
 	// Comprueba que el tipo de tOperador y de tOperando sean compatibles. En
 	// caso de serlo devuelve dicho tipo y en caso contrario devuelve err.
 	{
-
 		if ((tOperador.getTipo() == ETipo.INTEGER
 				|| tOperador.getTipo() == ETipo.NATURAL
 				|| tOperador.getTipo() == ETipo.NUMERICA
-				|| tOperador.getTipo() == ETipo.CHAR 
-				|| tOperador.getTipo() == ETipo.FLOAT)
+				|| tOperador.getTipo() == ETipo.CHAR || tOperador.getTipo() == ETipo.FLOAT)
 				&& (tOperando.getTipo() == ETipo.BOOLEAN))
 			return new Tipo(ETipo.ERR);
 		else if ((tOperador.getTipo() == ETipo.INTEGER
 				|| tOperador.getTipo() == ETipo.NATURAL
-				|| tOperador.getTipo() == ETipo.NATURAL 
-				|| tOperador.getTipo() == ETipo.NUMERICA)
+				|| tOperador.getTipo() == ETipo.NATURAL || tOperador.getTipo() == ETipo.NUMERICA)
 				&& tOperando.getTipo() == ETipo.CHAR)// casting
 			return new Tipo(ETipo.ERR);
 		/*
@@ -1511,8 +1472,7 @@ public void RDecs() throws Error {
 		 * tOperando.tipo == boolean))//valor abs return <tipo:’err’>
 		 */
 		else if (tOperador.getTipo() == ETipo.CHAR
-				&& (tOperando.getTipo() == ETipo.INTEGER 
-						|| tOperando.getTipo() == ETipo.FLOAT))
+				&& (tOperando.getTipo() == ETipo.INTEGER || tOperando.getTipo() == ETipo.FLOAT))
 			return new Tipo(ETipo.ERR);
 		else if (tOperador.getTipo() == ETipo.NUMERICA
 				&& tOperando.getTipo() == ETipo.NATURAL)
@@ -1523,20 +1483,20 @@ public void RDecs() throws Error {
 			return tOperador;
 	}
 
-	public Tipo tipoDeExpBin(Tipo tipoInstruccion,
-			Tipo tOperando1, Tipo tOperando2)
+	public Tipo tipoDeExpBin(Tipo tipoInstruccion, Tipo tOperando1,
+			Tipo tOperando2)
 	// Comprueba que el tipo de tOperador, de tOperando1 y tOperando2 sean
 	// compatibles. En caso de serlo devuelve dicho tipo y en caso contrario
 	// devuelve err.
 	{
 		if ((tOperando1.getTipo() == ETipo.ERR)
-				||(tOperando2.getTipo() == ETipo.ERR)
+				|| (tOperando2.getTipo() == ETipo.ERR)
 				|| (tOperando1.getTipo() == ETipo.CHAR)
 				|| (tOperando2.getTipo() == ETipo.CHAR))
 			return new Tipo(ETipo.ERR);
 		else {
 			if (tipoInstruccion.getTipo() == ETipo.NUMERICA) {
-				if ((tOperando1.getTipo() != ETipo.BOOLEAN)	
+				if ((tOperando1.getTipo() != ETipo.BOOLEAN)
 						&& (tOperando2.getTipo() != ETipo.BOOLEAN)) {
 					if ((tOperando1.getTipo() == ETipo.FLOAT)
 							|| (tOperando2.getTipo() == ETipo.FLOAT))
@@ -1546,21 +1506,24 @@ public void RDecs() throws Error {
 						return new Tipo(ETipo.INTEGER);
 					else
 						return new Tipo(ETipo.NATURAL);
-				} else			return new Tipo(ETipo.ERR);
+				} else
+					return new Tipo(ETipo.ERR);
 
 			} else {
 				if ((tOperando1.getTipo() == tOperando2.getTipo())//cambiado
 						&& (tOperando1.getTipo() == ETipo.BOOLEAN))
 					return new Tipo(ETipo.BOOLEAN);
-				else
-					if (tipoInstruccion.getTipo() == ETipo.MOD) {
-						
-					if ((tOperando1.getTipo()==ETipo.NATURAL ||tOperando1.getTipo()==ETipo.INTEGER)
-						&&(tOperando2.getTipo()==ETipo.NATURAL))
+				else if (tipoInstruccion.getTipo() == ETipo.MOD) {
+
+					if ((tOperando1.getTipo() == ETipo.NATURAL || tOperando1
+							.getTipo() == ETipo.INTEGER)
+							&& (tOperando2.getTipo() == ETipo.NATURAL))
 						return new Tipo(ETipo.INTEGER);
-					else return new Tipo(ETipo.ERR);
-						
-					}else return new Tipo(ETipo.ERR);
+					else
+						return new Tipo(ETipo.ERR);
+
+				} else
+					return new Tipo(ETipo.ERR);
 
 			}
 
@@ -1568,8 +1531,7 @@ public void RDecs() throws Error {
 
 	}
 
-	public Tipo tipoDeExpComp(Tipo tOperador1,
-			Tipo tOperador2) {
+	public Tipo tipoDeExpComp(Tipo tOperador1, Tipo tOperador2) {
 		if ((tOperador1.getTipo() == ETipo.ERR)
 				|| (tOperador2.getTipo() == ETipo.ERR))
 			return new Tipo(ETipo.ERR);
@@ -1594,9 +1556,7 @@ public void RDecs() throws Error {
 
 	}
 
-
-	public Tipo tipoDeDespl(Tipo tOperador1,
-			Tipo tOperador2, Tipo tOperacion) {
+	public Tipo tipoDeDespl(Tipo tOperador1, Tipo tOperador2, Tipo tOperacion) {
 		if ((tOperador1.getTipo() == ETipo.ERR)
 				|| (tOperador2.getTipo() == ETipo.ERR)
 				|| (tOperador1.getTipo() == ETipo.CHAR)
@@ -1613,81 +1573,89 @@ public void RDecs() throws Error {
 
 			} else {
 
-				if (((tOperador1.getTipo() == ETipo.NATURAL) && (tOperador2.getTipo() == ETipo.NATURAL))
-						|| ((tOperador1.getTipo() == ETipo.NATURAL) && (tOperador2.getTipo() == ETipo.INTEGER))) {
+				if (((tOperador1.getTipo() == ETipo.NATURAL) && (tOperador2
+						.getTipo() == ETipo.NATURAL))
+						|| ((tOperador1.getTipo() == ETipo.NATURAL) && (tOperador2
+								.getTipo() == ETipo.INTEGER))) {
 					return tOperador1;
 				} else
 					return new Tipo(ETipo.ERR);
 			}
 		}
 	}
-	
-	
-	
-	
-	
-	public boolean compatibles(Tipo tipo1, Tipo tipo2){
-		Vector<Tipo> visitadas = new Vector<Tipo>();		
+
+	public boolean compatibles(Tipo tipo1, Tipo tipo2) {
+		Vector<Tipo> visitadas = new Vector<Tipo>();
 		return compatibles2(tipo1, tipo2, visitadas);
 	}
-	
-	public boolean compatibles2(Tipo tipo1, Tipo tipo2, Vector<Tipo> visitadas){
+
+	public boolean compatibles2(Tipo tipo1, Tipo tipo2, Vector<Tipo> visitadas) {
 		if (visitadas.contains(tipo1) && visitadas.contains(tipo2))
 			return true;
-		else{
+		else {
 			visitadas.add(tipo1);
 			visitadas.add(tipo2);
-		
-			if ((tipo1.getTipo() == ETipo.CHAR&& tipo2.getTipo() == ETipo.CHAR)
-				||(tipo1.getTipo() == ETipo.BOOLEAN && tipo2.getTipo() == ETipo.BOOLEAN )
-				||(tipo1.getTipo() == ETipo.NATURAL && tipo2.getTipo() == ETipo.NATURAL ))
+
+			if ((tipo1.getTipo() == ETipo.CHAR && tipo2.getTipo() == ETipo.CHAR)
+					|| (tipo1.getTipo() == ETipo.BOOLEAN && tipo2.getTipo() == ETipo.BOOLEAN)
+					|| (tipo1.getTipo() == ETipo.NATURAL && tipo2.getTipo() == ETipo.NATURAL))
 				return true;
-			
-			else if (tipo1.getTipo() == ETipo.INTEGER &&(tipo2.getTipo() == ETipo.INTEGER ||tipo2.getTipo() == ETipo.NATURAL ))
+
+			else if (tipo1.getTipo() == ETipo.INTEGER
+					&& (tipo2.getTipo() == ETipo.INTEGER || tipo2.getTipo() == ETipo.NATURAL))
 				return true;
-			
-			else if (tipo1.getTipo() == ETipo.FLOAT &&(tipo2.getTipo() == ETipo.INTEGER ||tipo2.getTipo() == ETipo.NATURAL ||tipo2.getTipo() == ETipo.FLOAT ))
+
+			else if (tipo1.getTipo() == ETipo.FLOAT
+					&& (tipo2.getTipo() == ETipo.INTEGER
+							|| tipo2.getTipo() == ETipo.NATURAL || tipo2
+							.getTipo() == ETipo.FLOAT))
 				return true;
-			
-			
-			else if (tipo1.getTipo() == ETipo.POINTER && tipo2.getTipo() == ETipo.POINTER )
-				return compatibles2(_ts.getTipo(tipo1.getId()), _ts.getTipo(tipo2.getId()), visitadas);
-			
-			else if (tipo1.getTipo()==ETipo.REF) return compatibles2(_ts.getTipo(tipo1.getId()), tipo2, visitadas);
-			else if (tipo2.getTipo()==ETipo.REF) return compatibles2(tipo1, _ts.getTipo(tipo2.getId()), visitadas);
-			
-			else if (tipo1.getTipo()==ETipo.ARRAY &&
-					 tipo1.getTipo()==ETipo.ARRAY &&
-					 tipo1.getNum_elems()==tipo2.getNum_elems())
-				return compatibles2(tipo1.getTbase(), tipo2.getTbase(), visitadas);
-			
-			else if (tipo1.getTipo()==ETipo.RECORD &&
-					 tipo2.getTipo()==ETipo.RECORD &&
-					 tipo1.getCampos().size() == tipo2.getCampos().size())
-			{
-				for (int i=0;i<tipo1.getCampos().size();i++){
-					if (!compatibles2(tipo1.getCampos().get(i).getTipo(), tipo2.getCampos().get(i).getTipo(), visitadas))
+
+			else if (tipo1.getTipo() == ETipo.POINTER
+					&& tipo2.getTipo() == ETipo.POINTER)
+				return compatibles2(_ts.getTipo(tipo1.getId()), _ts
+						.getTipo(tipo2.getId()), visitadas);
+			else if (tipo1.getTipo() == ETipo.POINTER
+					&& tipo2.getTipo() == ETipo.NULL)
+				return true;
+
+			else if (tipo1.getTipo() == ETipo.REF)
+				return compatibles2(_ts.getTipo(tipo1.getId()), tipo2,
+						visitadas);
+			else if (tipo2.getTipo() == ETipo.REF)
+				return compatibles2(tipo1, _ts.getTipo(tipo2.getId()),
+						visitadas);
+
+			else if (tipo1.getTipo() == ETipo.ARRAY
+					&& tipo1.getTipo() == ETipo.ARRAY
+					&& tipo1.getNum_elems() == tipo2.getNum_elems())
+				return compatibles2(tipo1.getTbase(), tipo2.getTbase(),
+						visitadas);
+
+			else if (tipo1.getTipo() == ETipo.RECORD
+					&& tipo2.getTipo() == ETipo.RECORD
+					&& tipo1.getCampos().size() == tipo2.getCampos().size()) {
+				for (int i = 0; i < tipo1.getCampos().size(); i++) {
+					if (!compatibles2(tipo1.getCampos().get(i).getTipo(), tipo2
+							.getCampos().get(i).getTipo(), visitadas))
 						return false;
 				}
 				return true;
-			}
-			else if (tipo1.getTipo() == ETipo.PROC &&
-					tipo2.getTipo() == ETipo.PROC &&
-					tipo1.getParametros().size() == tipo2.getParametros().size()){
-					for (int i=0;i<tipo1.getParametros().size();i++){
-						if (!compatibles(tipo1.getParametros().get(i).getTipo(), tipo1.getParametros().get(i).getTipo()) ||
-							tipo2.getParametros().get(i).getModo() == EModo.VARIABLE && tipo1.getParametros().get(i).getModo() != EModo.VARIABLE)
-								return false;
-					}
-					return true;
-			}
-			else return false;
+			} else if (tipo1.getTipo() == ETipo.PROC
+					&& tipo2.getTipo() == ETipo.PROC
+					&& tipo1.getParametros().size() == tipo2.getParametros()
+							.size()) {
+				for (int i = 0; i < tipo1.getParametros().size(); i++) {
+					if (!compatibles(tipo1.getParametros().get(i).getTipo(),
+							tipo1.getParametros().get(i).getTipo())
+							|| tipo2.getParametros().get(i).getModo() == EModo.VARIABLE
+							&& tipo1.getParametros().get(i).getModo() != EModo.VARIABLE)
+						return false;
+				}
+				return true;
+			} else
+				return false;
 		}
 	}
-	
-	
-	
-	
-	
 
 }
