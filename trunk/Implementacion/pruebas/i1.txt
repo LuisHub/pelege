@@ -18,23 +18,25 @@ arbol->.izq := null;
 arbol->.der := null;
 }
 &
-#if arbol = null then
-inserta();
-#else
-#if arbol->.valor < valor then
-aniade(valor, arbol->.izq);
-#else
-#if arbol->.valor > valor then
-#aniade(valor, arbol->.der);
+if arbol = null then
+{inserta();}
+else
+{if arbol->.valor < valor then
+{aniade(valor, arbol->.izq);}
+else
+{if arbol->.valor > valor then
+{aniade(valor, arbol->.der);}
+}
+}
 }
 procedure libera(var tarbol arbol) {
 procedure liberacion(tarbol arbol) {
 &
-#if arbol =/= null then {
+if arbol =/= null then {
 liberacion(arbol->.izq);
 liberacion(arbol->.der);
 dispose arbol;
-#}
+}
 }
 &
 liberacion(arbol);
@@ -46,23 +48,23 @@ boolean fin;
 &
 libera(arbol);
 fin := false;
-#while not fin do {
+while not fin do {
 in(valor);
-#if valor >= 0 then
-aniade(valor, arbol);
-#else
-fin := true;
-#}
+if valor >= 0 then
+{aniade(valor, arbol);}
+else
+{fin := true;}
+}
 }
 procedure aplana(tarbol arbol, var tsecuencia secuencia) {
 procedure hazAplanado(tarbol arbol) {
 &
-#if arbol =/= null then {
+if arbol =/= null then {
 hazAplanado(arbol->.izq);
 secuencia.tope := secuencia.tope+1;
 secuencia.valores[secuencia.tope] := arbol->.valor;#63
 hazAplanado(arbol->.der);
-#}
+}
 }
 &
 secuencia.tope := 1;
