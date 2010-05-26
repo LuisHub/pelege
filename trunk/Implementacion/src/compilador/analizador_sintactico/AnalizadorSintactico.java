@@ -47,7 +47,7 @@ public class AnalizadorSintactico {
 		_instrucciones = new Vector<Instruccion>();
 		_tokenActual = _lexico.sigToken();
 		_pend = new Vector<String>();
-		_pend_tipo=new Vector<Tipo>();
+		_pend_tipo = new Vector<Tipo>();
 		_numNiveles = 0;
 	}
 
@@ -115,7 +115,7 @@ public class AnalizadorSintactico {
 
 			Declaraciones();
 		}
-		// TODO mirar si quedan atribitos en pendientes y si quedan error
+	
 	}
 
 	// /////////////////////////////////////////////////////////////
@@ -126,27 +126,11 @@ public class AnalizadorSintactico {
 		if (_tokenActual.getTipo() == TipoToken.ID) {
 			Resp dec = DecTipo();
 			_ts.anadeId(dec.getId(), dec.getProps());
-		
-			if (_pend.contains(dec.getId()))
-			{
-				int pos=_pend.indexOf(dec.getId());
-				
-			//this._pend_tipo.elementAt(pos).setTam(dec.getTipo().gett)
-				
-				//TODO tenog que encontrar alguna forma de meterle el tipo
-				/*int pos=_pend.indexOf(dec.getId());
-			Tipo tipoNoDeclarado= this._pend_tipo.elementAt(pos);
-			tipoNoDeclarado.setCampos(dec.getTipo().getCampos());
-			tipoNoDeclarado.setNum_elems(dec.getTipo().getNum_elems());
-			tipoNoDeclarado.setParametros(dec.getTipo().getParametros());
-			tipoNoDeclarado.setTam(dec.getTipo().getTam());
-			tipoNoDeclarado.setTbase(dec.getTipo().getTbase());
-			tipoNoDeclarado.setTipo(dec.getTipo().getTipo());
-			*/
+
+			if (_pend.contains(dec.getId())) {
 				_pend.remove(dec.getId());
-				//this._pend_tipo.remove(pos);
 			}
-			
+
 		}
 
 	}
@@ -190,15 +174,10 @@ public class AnalizadorSintactico {
 			tipo = new Tipo(ETipo.BOOLEAN, 1);
 			emparejaToken(TipoToken.BOOLEAN);
 		} else if (_tokenActual.getTipo() == TipoToken.POINTER) {
-			// TODO esto lo tendre que hacer con mas cabeza tendre que poner lo
-			// de pendiente aqui
 			emparejaToken(TipoToken.POINTER);
-			
 			Tipo tipo_aux = Tipo1(false);
-			
-			tipo = new Tipo(ETipo.POINTER, tipo_aux,1);
-	
-			
+			tipo = new Tipo(ETipo.POINTER, tipo_aux, 1);
+
 		} else if (_tokenActual.getTipo() == TipoToken.ID) {
 			String id = _tokenActual.getLexema();
 			emparejaToken(TipoToken.ID);
@@ -217,8 +196,8 @@ public class AnalizadorSintactico {
 				else {
 					tipo = new Tipo(ETipo.REF, id, -1);
 					_pend.add(id);
-					//this._pend_tipo.add(tipo);
-					
+					// this._pend_tipo.add(tipo);
+
 				}
 			}
 
@@ -618,24 +597,17 @@ public class AnalizadorSintactico {
 			_instrucciones.add(new InstruccionSUMA());
 			_etq = _etq + 3;
 			return RMem(tipo3);
-		} 
-		else if (_tokenActual.getTipo() == TipoToken.PUNTERO) {
+		} else if (_tokenActual.getTipo() == TipoToken.PUNTERO) {
 			emparejaToken(TipoToken.PUNTERO);
-			
-			
-			
-			 
-			
-			//añadir instrucciones para que vaya a la memoriarera
-			_instrucciones.add(new InstruccionPUNTERO());
-			_instrucciones.add(new InstruccionPUNTERO());
-			_instrucciones.add(new InstruccionPUNTERO());
-			_etq=_etq+3;
+
+			// creo que deberia ser solo esto
+			_instrucciones.add(new InstruccionAPILAIND());
+			_etq = _etq + 1;
 			return RMem(this.tipoDeTBase(tipo1));
-			//TODO instrucciones
-			//TODO instruciones
-			//TODO etiquetas ++
-			
+			// TODO instrucciones
+			// TODO instruciones
+			// TODO etiquetas ++
+
 		} else
 			return tipo1;
 	}
@@ -661,7 +633,7 @@ public class AnalizadorSintactico {
 					"tipoDeTBase: Identificadores para array no del tipo ARRAY e INTEGER. "
 							+ _tokenActual.toString());
 	}
-	
+
 	public Tipo tipoDeTBase(Tipo tipo1) throws Error {
 		if (tipo1.getTipo() == ETipo.POINTER)
 			return referencia(tipo1.getTbase());
@@ -694,8 +666,6 @@ public class AnalizadorSintactico {
 			return tipo;
 	}
 
-
-
 	public void Instr() throws Error {
 
 		if (_tokenActual.getTipo() == TipoToken.ID)
@@ -712,10 +682,12 @@ public class AnalizadorSintactico {
 			InstrWhile();
 		else if (_tokenActual.getTipo() == TipoToken.FOR)
 			InstrFor();
-		
-		  else if (_tokenActual.getTipo()==TipoToken.NEW) InstrNew(); else if
-		  (_tokenActual.getTipo()==TipoToken.DISPOSE) InstrDis();
-		 
+
+		else if (_tokenActual.getTipo() == TipoToken.NEW)
+			InstrNew();
+		else if (_tokenActual.getTipo() == TipoToken.DISPOSE)
+			InstrDis();
+
 		else
 			throw new Error(
 					"Instr: Se esperaba tokenID, tokenREAD o tokenWRITE. "
@@ -731,20 +703,20 @@ public class AnalizadorSintactico {
 		_instrucciones.add(new InstruccionDISPOSE());
 		_etq++;
 		// TODO hacer dispose
-		
+
 	}
 
 	private void InstrNew() throws Error {
 		emparejaToken(TipoToken.NEW);
 		emparejaToken(TipoToken.ID);
 		emparejaToken(TipoToken.SEPARADOR);
-		
+
 		_instrucciones.add(new InstruccionNEW());
 		_etq++;
 		_instrucciones.add(new InstruccionNEW());
 		_etq++;
 		// TODO hacer new
-		
+
 	}
 
 	public void InstrIf() throws Error {
@@ -858,10 +830,9 @@ public class AnalizadorSintactico {
 	}
 
 	public void RParams(Vector<Parametro> params) throws Error {
-		
-			emparejaToken(TipoToken.PARAP);
-		if (_tokenActual.getTipo() != TipoToken.PARCLA)	
-		{
+
+		emparejaToken(TipoToken.PARAP);
+		if (_tokenActual.getTipo() != TipoToken.PARCLA) {
 			inicioPaso();
 			_etq += longInicioPaso;
 			int nparams = LRParams(params);
@@ -879,12 +850,12 @@ public class AnalizadorSintactico {
 			throw new Error(
 					"RParams: Número de parámetros reales no corresponde con número de parámetros formales ("
 							+ String.valueOf(params.size()) + ")");
-		else emparejaToken(TipoToken.PARCLA);
+		else
+			emparejaToken(TipoToken.PARCLA);
 	}
 
 	public int LRParams(Vector<Parametro> params) throws Error {
-		
-		
+
 		_instrucciones.add(new InstruccionCOPIA());
 		_etq++;
 		boolean parh = true;
@@ -935,18 +906,17 @@ public class AnalizadorSintactico {
 		boolean parh = false;
 		Tipo tipo2 = Exp(parh).getTipo();
 
-		if (compatibles(tipo1,tipo2)){
-			if (compatibles(tipo1, new Tipo(ETipo.INTEGER)) || 
-				compatibles(tipo1, new Tipo(ETipo.BOOLEAN))
-				|| 
-				compatibles(tipo1, new Tipo(ETipo.NATURAL))
-				||
-				compatibles(tipo1, new Tipo(ETipo.FLOAT))
-				||
-				compatibles(tipo1, new Tipo(ETipo.CHAR))
-				)//VER SI AÑADIMOS MÁS, COMO ARRAY Y ESO
-				//Ver la diferencia entre tipos REF y POINTER
-				_instrucciones.add(new InstruccionDESAPILAIND());				
+		if (compatibles(tipo1, tipo2)) {
+			if (compatibles(tipo1, new Tipo(ETipo.INTEGER))
+					|| compatibles(tipo1, new Tipo(ETipo.BOOLEAN))
+					|| compatibles(tipo1, new Tipo(ETipo.NATURAL))
+					|| compatibles(tipo1, new Tipo(ETipo.FLOAT))
+					|| compatibles(tipo1, new Tipo(ETipo.CHAR)))// VER SI
+																// AÑADIMOS MÁS,
+																// COMO ARRAY Y
+																// ESO
+				// Ver la diferencia entre tipos REF y POINTER
+				_instrucciones.add(new InstruccionDESAPILAIND());
 			else
 				_instrucciones.add(new InstruccionMUEVE(tipo1.getTam()));
 			_etq++;
@@ -1050,7 +1020,7 @@ public class AnalizadorSintactico {
 		Tipo tipofinal;
 		if (_tokenActual.getTipo() == TipoToken.SUMA
 				|| _tokenActual.getTipo() == TipoToken.RESTA
-				/*|| _tokenActual.getTipo() == TipoToken.OR*/) {
+		/* || _tokenActual.getTipo() == TipoToken.OR */) {
 
 			boolean parche = false;
 
@@ -1064,17 +1034,16 @@ public class AnalizadorSintactico {
 
 			resp1 = RExpSimple(tipofinal, EModo.VALOR);
 
-		} 
-		/*else if (_tokenActual.getTipo() == TipoToken.OR)
-		{
-			boolean parche=false;//revisar!
-			Resp resp = OpAd();
-			resp2 = Term(parche);
-			//--cortar aqui el ccorto
-			tipofinal = tipoDeExpBin(resp.getTipo(), tipo1, resp2.getTipo());
-			
-			
-		}*/
+		}
+		/*
+		 * else if (_tokenActual.getTipo() == TipoToken.OR) { boolean
+		 * parche=false;//revisar! Resp resp = OpAd(); resp2 = Term(parche);
+		 * //--cortar aqui el ccorto tipofinal = tipoDeExpBin(resp.getTipo(),
+		 * tipo1, resp2.getTipo());
+		 * 
+		 * 
+		 * }
+		 */
 		else {
 			resp1 = new Resp(tipo1, modo1);
 		}
@@ -1157,7 +1126,7 @@ public class AnalizadorSintactico {
 
 		Instruccion codigo = null;
 		Tipo tipo = new Tipo(ETipo.ERR);
-		;
+
 		if (_tokenActual.getTipo() == TipoToken.DESPIZQ) {
 			codigo = new InstruccionDESPI();
 			tipo = new Tipo(ETipo.DESP);
@@ -1239,17 +1208,16 @@ public class AnalizadorSintactico {
 			resp = new Resp(new Tipo(ETipo.FLOAT), EModo.VALOR);
 			emparejaToken(TipoToken.FLOAT);
 			_etq++;
-		}
-		else if (_tokenActual.getTipo() == TipoToken.NULL) {
-			//TODO pongo menos -1 xq no tiene ninguna dir de memoria
-			//TODO pongo menos -1 xq no tiene ninguna dir de memoria
-			//TODO pongo menos -1 xq no tiene ninguna dir de memoria
+		} else if (_tokenActual.getTipo() == TipoToken.NULL) {
+			// TODO pongo menos -1 xq no tiene ninguna dir de memoria
+			// TODO pongo menos -1 xq no tiene ninguna dir de memoria
+			// TODO pongo menos -1 xq no tiene ninguna dir de memoria
 			_instrucciones.add(new InstruccionAPILA(-1));
 			resp = new Resp(new Tipo(ETipo.NULL), EModo.VALOR);
 			_etq++;
 			emparejaToken(TipoToken.NULL);
 		}
-		
+
 		else if (_tokenActual.getTipo() == TipoToken.CHARACTER) {
 			_instrucciones.add(new InstruccionAPILA((double) _tokenActual
 					.getLexema().charAt(0)));
@@ -1260,30 +1228,24 @@ public class AnalizadorSintactico {
 
 		else if (_tokenActual.getTipo() == TipoToken.ID) {
 
-			//resp = new Resp(Mem(null), EModo.VARIABLE);
+			// resp = new Resp(Mem(null), EModo.VARIABLE);
 			// TODO yo creo que aqui no hace falta nada parchin aqui lo usa
 			// Compatibilidad
-			/*
-			 * if ((compatibles(tipo.getTipo(), new Tipo(ETipo.INTEGER)) ||
-			 * compatibles(tipo.getTipo(), new Tipo(ETipo.BOOLEAN)))&& !parhin){
-			 * _instrucciones.add(new InstruccionAPILAIND()); _etq++;
-			 * 
-			 * }
-			 */
-			
+
 			resp = new Resp(Mem(null), EModo.VARIABLE);
-			
-			//esto lo hace si es un tipo simple
+
+			// esto lo hace si es un tipo simple
 			if ((compatibles(resp.getTipo(), new Tipo(ETipo.INTEGER))
-				||compatibles(resp.getTipo(), new Tipo(ETipo.BOOLEAN))
-				||compatibles(resp.getTipo(), new Tipo(ETipo.NATURAL))
-				||compatibles(resp.getTipo(), new Tipo(ETipo.FLOAT))
-				||compatibles(resp.getTipo(), new Tipo(ETipo.CHAR)))&& !parhin){
+					|| compatibles(resp.getTipo(), new Tipo(ETipo.BOOLEAN))
+					|| compatibles(resp.getTipo(), new Tipo(ETipo.NATURAL))
+					|| compatibles(resp.getTipo(), new Tipo(ETipo.FLOAT)) || compatibles(
+					resp.getTipo(), new Tipo(ETipo.CHAR)))
+					&& !parhin) {
 				_instrucciones.add(new InstruccionAPILAIND());
 				_etq++;
-				
-			}	
-			
+
+			}
+
 		} else if (_tokenActual.getTipo() == TipoToken.TRUE) {
 			_instrucciones.add(new InstruccionAPILA(1));
 			resp = new Resp(new Tipo(ETipo.BOOLEAN), EModo.VALOR);
@@ -1327,7 +1289,7 @@ public class AnalizadorSintactico {
 			codigo = new InstruccionRESTA();
 			tipo = new Tipo(ETipo.NUMERICA);
 			emparejaToken(TipoToken.RESTA);
-			//vamos a dejar el OR aquí
+			// vamos a dejar el OR aquí
 		} else if (_tokenActual.getTipo() == TipoToken.OR) {
 			codigo = new InstruccionOR();
 			tipo = new Tipo(ETipo.BOOLEAN);
@@ -1352,13 +1314,12 @@ public class AnalizadorSintactico {
 			codigo = new InstruccionDIV();
 			tipo = new Tipo(ETipo.NUMERICA);
 			emparejaToken(TipoToken.DIV);
-			//vamos a dejar el AND aquí
+			// vamos a dejar el AND aquí
 		} else if (_tokenActual.getTipo() == TipoToken.AND) {
 			codigo = new InstruccionAND();
 			tipo = new Tipo(ETipo.BOOLEAN);
 			emparejaToken(TipoToken.AND);
-		}
-		else if (_tokenActual.getTipo() == TipoToken.PORCEN) {
+		} else if (_tokenActual.getTipo() == TipoToken.PORCEN) {
 			codigo = new InstruccionMOD();
 			tipo = new Tipo(ETipo.MOD);
 			emparejaToken(TipoToken.PORCEN);
@@ -1457,6 +1418,15 @@ public class AnalizadorSintactico {
 	// Comprueba que el tipo de tOperador y de tOperando sean compatibles. En
 	// caso de serlo devuelve dicho tipo y en caso contrario devuelve err.
 	{
+
+		if ((tOperando.getTipo() == ETipo.ARRAY)
+				|| (tOperando.getTipo() == ETipo.POINTER)
+				|| (tOperando.getTipo() == ETipo.NULL)
+				|| (tOperando.getTipo() == ETipo.RECORD)
+				|| (tOperando.getTipo() == ETipo.REF))
+			return new Tipo(ETipo.ERR);
+		else
+
 		if ((tOperador.getTipo() == ETipo.INTEGER
 				|| tOperador.getTipo() == ETipo.NATURAL
 				|| tOperador.getTipo() == ETipo.NUMERICA
@@ -1490,6 +1460,19 @@ public class AnalizadorSintactico {
 	// compatibles. En caso de serlo devuelve dicho tipo y en caso contrario
 	// devuelve err.
 	{
+		if ((tOperando1.getTipo() == ETipo.ARRAY)
+				|| (tOperando1.getTipo() == ETipo.POINTER)
+				|| (tOperando1.getTipo() == ETipo.NULL)
+				|| (tOperando1.getTipo() == ETipo.RECORD)
+				|| (tOperando1.getTipo() == ETipo.REF))
+			return new Tipo(ETipo.ERR);
+		else if ((tOperando2.getTipo() == ETipo.ARRAY)
+				|| (tOperando2.getTipo() == ETipo.POINTER)
+				|| (tOperando2.getTipo() == ETipo.NULL)
+				|| (tOperando2.getTipo() == ETipo.RECORD)
+				|| (tOperando2.getTipo() == ETipo.REF))
+			return new Tipo(ETipo.ERR);
+		else
 		if ((tOperando1.getTipo() == ETipo.ERR)
 				|| (tOperando2.getTipo() == ETipo.ERR)
 				|| (tOperando1.getTipo() == ETipo.CHAR)
@@ -1511,7 +1494,7 @@ public class AnalizadorSintactico {
 					return new Tipo(ETipo.ERR);
 
 			} else {
-				if ((tOperando1.getTipo() == tOperando2.getTipo())//cambiado
+				if ((tOperando1.getTipo() == tOperando2.getTipo())
 						&& (tOperando1.getTipo() == ETipo.BOOLEAN))
 					return new Tipo(ETipo.BOOLEAN);
 				else if (tipoInstruccion.getTipo() == ETipo.MOD) {
@@ -1533,20 +1516,34 @@ public class AnalizadorSintactico {
 	}
 
 	public Tipo tipoDeExpComp(Tipo tOperador1, Tipo tOperador2) {
+		
+		if ((tOperador1.getTipo() == ETipo.ARRAY)
+				|| (tOperador1.getTipo() == ETipo.POINTER)
+				|| (tOperador1.getTipo() == ETipo.NULL)
+				|| (tOperador1.getTipo() == ETipo.RECORD)
+				|| (tOperador1.getTipo() == ETipo.REF))
+			return new Tipo(ETipo.ERR);
+		else if ((tOperador2.getTipo() == ETipo.ARRAY)
+				|| (tOperador2.getTipo() == ETipo.POINTER)
+				|| (tOperador2.getTipo() == ETipo.NULL)
+				|| (tOperador2.getTipo() == ETipo.RECORD)
+				|| (tOperador2.getTipo() == ETipo.REF))
+			return new Tipo(ETipo.ERR);
+		else
 		if ((tOperador1.getTipo() == ETipo.ERR)
 				|| (tOperador2.getTipo() == ETipo.ERR))
 			return new Tipo(ETipo.ERR);
 		else {
 			if ((tOperador1.getTipo() == ETipo.BOOLEAN)
 					|| (tOperador2.getTipo() == ETipo.BOOLEAN)) {
-				if (tOperador1.getTipo() == tOperador2.getTipo())//cambiado
+				if (tOperador1.getTipo() == tOperador2.getTipo())// cambiado
 					return new Tipo(ETipo.BOOLEAN);
 				else
 					return new Tipo(ETipo.ERR);
 			} else {
 				if ((tOperador1.getTipo() == ETipo.CHAR)
 						|| (tOperador2.getTipo() == ETipo.CHAR)) {
-					if (tOperador1.getTipo() == tOperador2.getTipo())//cambiado
+					if (tOperador1.getTipo() == tOperador2.getTipo())// cambiado
 						return new Tipo(ETipo.BOOLEAN);
 					else
 						return new Tipo(ETipo.ERR);
@@ -1558,7 +1555,21 @@ public class AnalizadorSintactico {
 	}
 
 	public Tipo tipoDeDespl(Tipo tOperador1, Tipo tOperador2, Tipo tOperacion) {
-		if ((tOperador1.getTipo() == ETipo.ERR)
+
+		if ((tOperador1.getTipo() == ETipo.ARRAY)
+				|| (tOperador1.getTipo() == ETipo.POINTER)
+				|| (tOperador1.getTipo() == ETipo.NULL)
+				|| (tOperador1.getTipo() == ETipo.RECORD)
+				|| (tOperador1.getTipo() == ETipo.REF))
+			return new Tipo(ETipo.ERR);
+		else if ((tOperador2.getTipo() == ETipo.ARRAY)
+				|| (tOperador2.getTipo() == ETipo.POINTER)
+				|| (tOperador2.getTipo() == ETipo.NULL)
+				|| (tOperador2.getTipo() == ETipo.RECORD)
+				|| (tOperador2.getTipo() == ETipo.REF))
+			return new Tipo(ETipo.ERR);
+		else
+			if ((tOperador1.getTipo() == ETipo.ERR)
 				|| (tOperador2.getTipo() == ETipo.ERR)
 				|| (tOperador1.getTipo() == ETipo.CHAR)
 				|| (tOperador2.getTipo() == ETipo.CHAR))
@@ -1566,7 +1577,7 @@ public class AnalizadorSintactico {
 			return new Tipo(ETipo.ERR);
 		else {
 			if (tOperacion.getTipo() == ETipo.DESP) {
-				if ((tOperador1.getTipo() == tOperador2.getTipo())//cambiado
+				if ((tOperador1.getTipo() == tOperador2.getTipo())
 						&& (tOperador1.getTipo() == ETipo.NATURAL))
 					return new Tipo(ETipo.NATURAL);
 				else
