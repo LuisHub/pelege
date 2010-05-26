@@ -1,0 +1,12 @@
+integer i;
+&
+i:=0;
+while (i<10) do
+
+	{out(i);
+	i:=i+1
+	
+	
+	
+	}
+	
