@@ -630,6 +630,7 @@ public class AnalizadorSintactico {
 			_instrucciones.add(new InstruccionPUNTERO());
 			_instrucciones.add(new InstruccionPUNTERO());
 			_instrucciones.add(new InstruccionPUNTERO());
+			_etq=_etq+3;
 			return RMem(this.tipoDeTBase(tipo1));
 			//TODO instrucciones
 			//TODO instruciones
