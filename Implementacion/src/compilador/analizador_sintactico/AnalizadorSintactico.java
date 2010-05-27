@@ -10,7 +10,6 @@ import compilador.tabla.*;
 import compilador.tokens.*;
 
 public class AnalizadorSintactico {
-	// esto es una prueba para subir contenido al repositorio willy
 
 	public Vector<Instruccion> get_instrucciones() {
 		return _instrucciones;
@@ -86,7 +85,7 @@ public class AnalizadorSintactico {
 		if (_tokenActual.getTipo() == TipoToken.EOF) {
 			emparejaToken(TipoToken.EOF);
 			System.out
-					.println("Se ha realizado el analisis sintáctico con éxito.");
+					.println("Se ha realizado el analisis sintï¿½ctico con ï¿½xito.");
 		}
 	}
 
@@ -212,8 +211,8 @@ public class AnalizadorSintactico {
 			if (!referenciaErronea(tipo_aux)) {
 				tipo = new Tipo(ETipo.ARRAY, n, tipo_aux, tipo_aux.getTam() * n);
 			} else
-				throw new Error("Tipo: referencia errónea ya que "
-						+ tipo_aux.getId() + "no está definido. "
+				throw new Error("Tipo: referencia errï¿½nea ya que "
+						+ tipo_aux.getId() + "no estï¿½ definido. "
 						+ _tokenActual.toString() + ")");
 
 		} else if (_tokenActual.getTipo() == TipoToken.RECORD) {
@@ -344,7 +343,7 @@ public class AnalizadorSintactico {
 			_ts.anadeId(id, props);
 			_ts.getRegistroTabla(id).setNivel(_nivel);
 			inicio = Bloque(id);
-			// parchear la dirección del procedimiento en la tabla asociada al
+			// parchear la direcciï¿½n del procedimiento en la tabla asociada al
 			// procedimiento
 			props.setInicio(inicio);
 			_nivel--;
@@ -424,7 +423,7 @@ public class AnalizadorSintactico {
 		emparejaToken(TipoToken.PROGRAM);
 
 		inicio = _etq;
-		// parchear la dirección del procedimiento en la tabla asociada al
+		// parchear la direcciï¿½n del procedimiento en la tabla asociada al
 		// procedimiento para posibles llamadas recursivas
 		_ts.getRegistroTabla(id).setInicio(inicio);
 
@@ -737,7 +736,7 @@ public class AnalizadorSintactico {
 			PElse();
 			parchea(etq2, _etq);
 		} else
-			throw new Error("InstrIf: El tipo de la expresión no es BOOLEAN.");
+			throw new Error("InstrIf: El tipo de la expresiï¿½n no es BOOLEAN.");
 	}
 
 	public void PElse() throws Error {
@@ -764,19 +763,31 @@ public class AnalizadorSintactico {
 			parchea(etq2, _etq);
 		} else
 			throw new Error(
-					"InstrWhile: El tipo de la expresión no es BOOLEAN.");
+					"InstrWhile: El tipo de la expresiï¿½n no es BOOLEAN.");
 	}
 
 	public void InstrFor() throws Error {
 		// REVISAR CIRCUITO CORTO
 		emparejaToken(TipoToken.FOR);
-		int etq1 = _etq;
+		//int etq1 = _etq;
 		boolean parh = false;
-		//Tipo tipo1 = Exp(parh).getTipo();
-		InstrAsig(_tokenActual);//NECESITO EL TIPO!!
-		//Tipo tipo1 = _tokenActual.getTipo();
+		
+		String id;
+		if(_tokenActual.getTipo() == TipoToken.ID)
+			 id = _tokenActual.getLexema();
+		else
+			 throw new Error("InstrFor: Los tipos de las expresiones no son compatibles.");
+		
+		Tipo tipo1 = InstrAsigFor();
+		int etq1 = _etq;
+		accesoVar(_ts.getRegistroTabla(id));
+		_etq += longAccesoVar(_ts.getRegistroTabla(id));//cima dir
+		_instrucciones.add(new InstruccionAPILAIND());
+		_etq++;
 		emparejaToken(TipoToken.TO);
 		Tipo tipo2 = Exp(parh).getTipo();
+		_instrucciones.add(new InstruccionLT());
+		_etq++;
 		if (compatibles(tipo1, tipo2)) 
 			{
 			emparejaToken(TipoToken.DO);
@@ -784,6 +795,18 @@ public class AnalizadorSintactico {
 			int etq2 = _etq;
 			_etq++;
 			InsComp();
+			accesoVar(_ts.getRegistroTabla(id));
+			_etq += longAccesoVar(_ts.getRegistroTabla(id));
+			accesoVar(_ts.getRegistroTabla(id));
+			_etq += longAccesoVar(_ts.getRegistroTabla(id));
+			_instrucciones.add(new InstruccionAPILAIND());
+			_etq ++;
+			_instrucciones.add(new InstruccionAPILA(1));
+			_etq ++;
+			_instrucciones.add(new InstruccionSUMA());
+			_etq ++;
+			_instrucciones.add(new InstruccionDESAPILAIND());
+			_etq ++;			
 			_instrucciones.add(new InstruccionIRA(etq1));
 			_etq++;
 			parchea(etq2, _etq);
@@ -853,13 +876,13 @@ public class AnalizadorSintactico {
 				emparejaToken(TipoToken.PARCLA);
 			} else
 				throw new Error(
-						"RParams: Número de parámetros reales("
+						"RParams: Nï¿½mero de parï¿½metros reales("
 								+ String.valueOf(nparams)
-								+ ") no corresponde con número de parámetros formales ("
+								+ ") no corresponde con nï¿½mero de parï¿½metros formales ("
 								+ String.valueOf(params.size()) + ")");
 		} else if (params.size() != 0)
 			throw new Error(
-					"RParams: Número de parámetros reales no corresponde con número de parámetros formales ("
+					"RParams: Nï¿½mero de parï¿½metros reales no corresponde con nï¿½mero de parï¿½metros formales ("
 							+ String.valueOf(params.size()) + ")");
 		else
 			emparejaToken(TipoToken.PARCLA);
@@ -923,7 +946,7 @@ public class AnalizadorSintactico {
 					|| compatibles(tipo1, new Tipo(ETipo.NATURAL))
 					|| compatibles(tipo1, new Tipo(ETipo.FLOAT))
 					|| compatibles(tipo1, new Tipo(ETipo.CHAR)))// VER SI
-																// AÑADIMOS MÁS,
+																// Aï¿½ADIMOS Mï¿½S,
 																// COMO ARRAY Y
 																// ESO
 				// Ver la diferencia entre tipos REF y POINTER
@@ -936,6 +959,34 @@ public class AnalizadorSintactico {
 			throw new Error("InstrAsig: Tipos no compatibles "
 					+ _tokenActual.toString());
 
+	}
+	
+	public Tipo InstrAsigFor() throws Error {
+
+		Tipo tipo1 = Mem(null);
+		emparejaToken(TipoToken.ASIG);
+		boolean parh = false;
+		Tipo tipo2 = Exp(parh).getTipo();
+
+		if (compatibles(tipo1, tipo2)) {
+			if (compatibles(tipo1, new Tipo(ETipo.INTEGER))
+					|| compatibles(tipo1, new Tipo(ETipo.BOOLEAN))
+					|| compatibles(tipo1, new Tipo(ETipo.NATURAL))
+					|| compatibles(tipo1, new Tipo(ETipo.FLOAT))
+					|| compatibles(tipo1, new Tipo(ETipo.CHAR)))// VER SI
+																// Aï¿½ADIMOS Mï¿½S,
+																// COMO ARRAY Y
+																// ESO
+				// Ver la diferencia entre tipos REF y POINTER
+				_instrucciones.add(new InstruccionDESAPILAIND());
+			else
+				_instrucciones.add(new InstruccionMUEVE(tipo1.getTam()));
+			_etq++;
+			//emparejaToken(TipoToken.SEPARADOR);
+			return tipo1;
+		} else
+			throw new Error("InstrAsig: Tipos no compatibles "
+					+ _tokenActual.toString());
 	}
 
 	// _tokenActual -> TokenREAD
@@ -982,7 +1033,7 @@ public class AnalizadorSintactico {
 			_etq++;
 		} else
 			throw new Error(
-					"InstrEsc: El tipo de la expresión entre paréntesis es ERROR. "
+					"InstrEsc: El tipo de la expresiï¿½n entre parï¿½ntesis es ERROR. "
 							+ tokenTmp.toString());
 	}
 
@@ -1301,7 +1352,7 @@ public class AnalizadorSintactico {
 			codigo = new InstruccionRESTA();
 			tipo = new Tipo(ETipo.NUMERICA);
 			emparejaToken(TipoToken.RESTA);
-			// vamos a dejar el OR aquí
+			// vamos a dejar el OR aquï¿½
 		} else if (_tokenActual.getTipo() == TipoToken.OR) {
 			codigo = new InstruccionOR();
 			tipo = new Tipo(ETipo.BOOLEAN);
@@ -1326,7 +1377,7 @@ public class AnalizadorSintactico {
 			codigo = new InstruccionDIV();
 			tipo = new Tipo(ETipo.NUMERICA);
 			emparejaToken(TipoToken.DIV);
-			// vamos a dejar el AND aquí
+			// vamos a dejar el AND aquï¿½
 		} else if (_tokenActual.getTipo() == TipoToken.AND) {
 			codigo = new InstruccionAND();
 			tipo = new Tipo(ETipo.BOOLEAN);
@@ -1452,7 +1503,7 @@ public class AnalizadorSintactico {
 			return new Tipo(ETipo.ERR);
 		/*
 		 * else if(tOperador== || && (tOperando.tipo == boolean ||
-		 * tOperando.tipo == boolean))//valor abs return <tipo:’err’>
+		 * tOperando.tipo == boolean))//valor abs return <tipo:ï¿½errï¿½>
 		 */
 		else if (tOperador.getTipo() == ETipo.CHAR
 				&& (tOperando.getTipo() == ETipo.INTEGER || tOperando.getTipo() == ETipo.FLOAT))
