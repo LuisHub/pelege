@@ -1,15 +1,23 @@
-#program Trece;
+#progam dos;
 
-interger x11y;
-boolean xx12;
-interger xx13;
-boolean xx14;
+tipo tcelda = record {
+float valor;
+float izq;
+float der;
+array[100] of float valores;
+
+};
+
+integer x;
+boolean y;
+procedure hazAplanado(tcelda c) {
 &
-in(x11y);
-xx13:=1+x11y;
-xx12:= true;
-out(xx13);
-xx14 := not(xx12);
-
-
+c.izq:=6;
+}
+tcelda cel;
+&
+x:=1;
+y:=true;
+cel.valores[1]:=1;
+hazAplanado(cel);
  

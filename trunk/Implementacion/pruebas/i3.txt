@@ -1,11 +1,6 @@
-#program tres;
-# esta no funciona porque boolean debe ser con minuscula 
-boolean x;
-boolean x;
-BOOLEAN x;
+integer x;
+integer y;
 &
-in(y);
-in(z);
-x:= y or z;
-out(x);
-
+x:=200;
+y:=100;
+out(x+y);

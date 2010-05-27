@@ -1,6 +1,25 @@
-#program cinco;
-# esta falla por no declarar y, bien
-integer x;
+#tipo tsecuencia = record { 
+ #                  integer tope; 
+  #                 array[2] of float valores ;
+   #               }; 
+tipo tpuntero = pointer integer;
+tpuntero x;
+tpuntero y;
+#tpuntero z;
+integer salida1;
+float salida2;
 &
-y:=4/2;
+new x;
+new y;
+x->:=3;
+y->:=4;
+#x->.tope:=2;
+#x->.valores[0]:=1;
+#x->.valores[1]:=2;
+#y->.tope:=5;
+#y->.valores[0]:=3;
+#y->.valores[1]:=4;
+dispose x;
+new x;
+x->:=5
 
