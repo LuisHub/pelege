@@ -614,9 +614,7 @@ public class AnalizadorSintactico {
 			_instrucciones.add(new InstruccionAPILAIND());
 			_etq = _etq + 1;
 			return RMem(this.tipoDeTBase(tipo1));
-			// TODO instrucciones
-			// TODO instruciones
-			// TODO etiquetas ++
+
 
 		} else
 			return tipo1;
@@ -1089,16 +1087,29 @@ public class AnalizadorSintactico {
 				|| _tokenActual.getTipo() == TipoToken.DISTINTO
 				|| _tokenActual.getTipo() == TipoToken.MENORIGUAL
 				|| _tokenActual.getTipo() == TipoToken.MAYORIGUAL) {
+			
+			if (tipo1.getTipo()==ETipo.POINTER )
+			{
+				if (_tokenActual.getTipo() == TipoToken.IGUAL||_tokenActual.getTipo() == TipoToken.DISTINTO)
+				{
+					
+					Resp resp = OpComp();
+					resp2 = ExpSimple(false);
+					resp1 = new Resp(new Tipo(ETipo.BOOLEAN), EModo.VALOR);
+					_instrucciones.add(resp.getCodigo());
+					this._etq = this._etq + 1;
+				}else resp1 = new Resp(new Tipo(ETipo.ERR), modo1);;
+			}
+			else
+			{
 
 			Resp resp = OpComp();
 			resp2 = ExpSimple(false);
 
 			resp1 = new Resp(tipoDeExpComp(tipo1, resp2.getTipo()), EModo.VALOR);
-			;
-
 			_instrucciones.add(resp.getCodigo());
 			this._etq = this._etq + 1;
-
+			}
 		} else {
 			resp1 = new Resp(tipo1, modo1);
 		}
@@ -1308,10 +1319,7 @@ public class AnalizadorSintactico {
 			emparejaToken(TipoToken.FLOAT);
 			_etq++;
 		} else if (_tokenActual.getTipo() == TipoToken.NULL) {
-			// TODO pongo menos -1 xq no tiene ninguna dir de memoria
-			// TODO pongo menos -1 xq no tiene ninguna dir de memoria
-			// TODO pongo menos -1 xq no tiene ninguna dir de memoria
-			_instrucciones.add(new InstruccionAPILA(-1));
+			_instrucciones.add(new InstruccionNULL());
 			resp = new Resp(new Tipo(ETipo.NULL), EModo.VALOR);
 			_etq++;
 			emparejaToken(TipoToken.NULL);
