@@ -1,5 +1,37 @@
 #program cuatro;
-integer x;
-&
-x:=2*3 % 12;
 
+integer x;
+array[5] of float valores;
+tipo tarray = array[5] of float;
+
+procedure aniade(tarray valor, integer va) {
+#procedure inserta() {
+#integer x1;
+#&
+#x1:=3;
+#}
+integer x2;
+&
+valor[1]:=va;
+}
+
+
+
+procedure prueba(){
+integer x3;
+&
+x3:=2;
+}
+
+
+ 
+tipo tsecuencia = record {
+float tope;
+float tope2;
+};
+tarray valores2;
+
+
+
+&
+aniade(valores2,x);

@@ -1,9 +1,4 @@
-#program Diecisies;
 
-integer x;
-boolean y;
-&
-x:=true;
 y:=1;
 
  

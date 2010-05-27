@@ -1,6 +1,31 @@
+pointer integer heo;
 #program diez;
+float valor;
+float izq;
+float der;
+array [6] of natural array1;
+array [6] of natural array2;
+tipo tsecuencia = record {
+natural tope;
+}
+tipo r = pointer tsecuencia; 
 
-integer x;
-&
-x:=3/2*11+(56);
 
+procedure libera(var float arbol)
+ {
+ &
+ arbol:=arbol+1;
+ }
+
+procedure liberar()
+ {
+ float f;
+ &
+f:=f+1;
+ }
+ 
+ &
+ 
+ libera(izq);
+ liberar();
+ array1:=array2;

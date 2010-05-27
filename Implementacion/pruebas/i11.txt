@@ -1,6 +1,10 @@
 #program once;
 
-integer x;
+integer i;
 &
-x:=(3/2*11+(56)-33);
+while (i<10) do
 
+       {out(i);
+       i:=i+1;
+       }
+       
