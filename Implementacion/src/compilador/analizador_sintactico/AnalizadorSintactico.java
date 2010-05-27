@@ -708,10 +708,12 @@ public class AnalizadorSintactico {
         //comprobar que id debe ser de tipo puntero
         if(referencia(_ts.getTipo(id)).getTipo()==ETipo.POINTER){
             accesoVar(_ts.getRegistroTabla(id));//nos deja en la cima su direccion
-            _etq=_etq+ 3;//revisar si es 4
+            _etq += longAccesoVar(_ts.getRegistroTabla(id));
+           // _etq=_etq+ 3;//revisar si es 4
             _instrucciones.add(new InstruccionAPILAIND());
                 _etq++; //porque en el accesovar habra hecho 4 instr.
             _instrucciones.add(new InstruccionDISPOSE(tipoDeID(id).getTbase().getTam()));
+            _etq++;
             emparejaToken(TipoToken.ID);
             emparejaToken(TipoToken.SEPARADOR);
             
