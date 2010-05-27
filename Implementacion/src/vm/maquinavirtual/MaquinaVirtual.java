@@ -27,6 +27,8 @@ public class MaquinaVirtual {
 	public BufferedReader br;
 	//--
 	private int pHeap;
+	private int[]regPunteros;//guarda la relacion entre un puntero y su apuntador
+	private int tamMemoria=64;
 	
 	public MaquinaVirtual(boolean t){
 		modoTraza = t;
@@ -36,13 +38,14 @@ public class MaquinaVirtual {
 		}
 		instrucciones = new Vector<Instruccion>();
 		//memoria = new double[32];
-		memoria = new double[64];
-		for (int i=0; i<32; i++)
+		memoria = new double[tamMemoria];
+		for (int i=0; i<tamMemoria; i++)
 			memoria[i] = 0;
 		pila = new Stack<Double>();
 		setPc(0);
 		setSig_pc(1);
 		pHeap=memoria.length-1;
+		regPunteros=new int[tamMemoria];
 	}
 	
 	public void run(){
@@ -100,7 +103,7 @@ public class MaquinaVirtual {
 	}
 	
 	public void imprimeMemoria(){		
-		for (int i=0;i<64;i++){
+		for (int i=0;i<tamMemoria;i++){
 			if ((i+1)%8 == 0)
 				System.out.println("["+memoria[i]+"]");
 			else
@@ -122,6 +125,38 @@ public class MaquinaVirtual {
 
 	public int getPc() {
 		return pc;
+	}
+
+	//reserva en el heap, devuelve la direccion del bloque reservado
+	public int newVM(int tam) {
+		//int dir=pHeap;
+		pHeap = pHeap -tam; //para que ahora apunte al siguiente libre
+		return pHeap+1;
+	}
+	public void deleteVM(int tam, double dirComienzo) {
+		
+		int aux=(int)dirComienzo-1;
+		int aux2=(int)dirComienzo+tam-1;
+		if(aux!=pHeap){			//si elimina algo de en medio, desplaza el heap
+			int bloque=aux-pHeap;
+			for (int i=0;i<bloque;i++)
+				memoria[(int) aux2-i ] =memoria[aux-i];
+		}
+		pHeap = pHeap +tam; //para que ahora apunte al siguiente libre
+		//actualizar los otros punteros
+		for(int i=0;i<tamMemoria;i++){
+			if ((0<regPunteros[i])&&(regPunteros[i]<dirComienzo))
+				regPunteros[i]=regPunteros[i]+tam;
+		}
+		
+	}
+
+	public void ponRegistroPuntero(double dirReserva, double dirVariable) {
+		regPunteros[(int)dirVariable]=(int)dirReserva;
+		//la variable que apunta a dirReserva esta en dirVariable
+	}
+	public int[] getRegistroPuntero(){
+		return regPunteros;
 	}
 	
 }

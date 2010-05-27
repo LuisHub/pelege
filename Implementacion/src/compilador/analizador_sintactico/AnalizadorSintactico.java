@@ -102,7 +102,7 @@ public class AnalizadorSintactico {
 					|| (_tokenActual.getTipo() == TipoToken.CHARACTER)
 					|| (_tokenActual.getTipo() == TipoToken.ID)
 					|| (_tokenActual.getTipo() == TipoToken.BOOLEAN)
-					|| (_tokenActual.getTipo() == TipoToken.PUNTERO)
+					|| (_tokenActual.getTipo() == TipoToken.POINTER)
 					|| (_tokenActual.getTipo() == TipoToken.ARRAY)
 					|| (_tokenActual.getTipo() == TipoToken.RECORD)) {
 				DecsVar();
@@ -208,6 +208,12 @@ public class AnalizadorSintactico {
 			emparejaToken(TipoToken.CORCLA);
 			emparejaToken(TipoToken.OF);
 			Tipo tipo_aux = Tipo1(true);
+			
+			if (tipo_aux.getTam()==-1)
+			{
+				throw new Error("declanrado variable de tipo no declarado");
+			}
+			
 			if (!referenciaErronea(tipo_aux)) {
 				tipo = new Tipo(ETipo.ARRAY, n, tipo_aux, tipo_aux.getTam() * n);
 			} else
@@ -240,6 +246,11 @@ public class AnalizadorSintactico {
 
 	public Resp Campo() throws Error {
 		Tipo tipo = Tipo1(true);
+		
+		if (tipo.getTam()==-1)
+		{
+			throw new Error("declanrado variable de tipo no declarado");
+		}
 		String id = _tokenActual.getLexema();
 		emparejaToken(TipoToken.ID);
 
@@ -343,7 +354,7 @@ public class AnalizadorSintactico {
 			_ts.anadeId(id, props);
 			_ts.getRegistroTabla(id).setNivel(_nivel);
 			inicio = Bloque(id);
-			// parchear la direcciï¿½n del procedimiento en la tabla asociada al
+			// parchear la dirección del procedimiento en la tabla asociada al
 			// procedimiento
 			props.setInicio(inicio);
 			_nivel--;
@@ -423,7 +434,7 @@ public class AnalizadorSintactico {
 		emparejaToken(TipoToken.PROGRAM);
 
 		inicio = _etq;
-		// parchear la direcciï¿½n del procedimiento en la tabla asociada al
+		// parchear la dirección del procedimiento en la tabla asociada al
 		// procedimiento para posibles llamadas recursivas
 		_ts.getRegistroTabla(id).setInicio(inicio);
 
@@ -694,29 +705,54 @@ public class AnalizadorSintactico {
 	}
 
 	private void InstrDis() throws Error {
-		emparejaToken(TipoToken.DISPOSE);
-		emparejaToken(TipoToken.ID);
-		emparejaToken(TipoToken.SEPARADOR);
-		_instrucciones.add(new InstruccionDISPOSE());
-		_etq++;
-		_instrucciones.add(new InstruccionDISPOSE());
-		_etq++;
-		// TODO hacer dispose
+        emparejaToken(TipoToken.DISPOSE);
+        String id= _tokenActual.getLexema();
+        //comprobar que id debe ser de tipo puntero
+        if(referencia(_ts.getTipo(id)).getTipo()==ETipo.POINTER){
+            accesoVar(_ts.getRegistroTabla(id));//nos deja en la cima su direccion
+            _etq=_etq+ 3;//revisar si es 4
+            _instrucciones.add(new InstruccionAPILAIND());
+                _etq++; //porque en el accesovar habra hecho 4 instr.
+            _instrucciones.add(new InstruccionDISPOSE(tipoDeID(id).getTbase().getTam()));
+            emparejaToken(TipoToken.ID);
+            emparejaToken(TipoToken.SEPARADOR);
+            
+        }
+        else 
+            throw new Error(
+                    "Instr: Dispose, intentas hacer Dispose a una variable no puntero "
+                            + _tokenActual.toString());
+    
+    
+    }
 
-	}
-
-	private void InstrNew() throws Error {
-		emparejaToken(TipoToken.NEW);
-		emparejaToken(TipoToken.ID);
-		emparejaToken(TipoToken.SEPARADOR);
-
-		_instrucciones.add(new InstruccionNEW());
-		_etq++;
-		_instrucciones.add(new InstruccionNEW());
-		_etq++;
-		// TODO hacer new
-
-	}
+	 private void InstrNew() throws Error {
+	        emparejaToken(TipoToken.NEW);
+	        String id= _tokenActual.getLexema();
+	        //comprobar que id debe ser de tipo puntero
+	        
+	        if(referencia(_ts.getTipo(id)).getTipo()==ETipo.POINTER)
+	        {
+	                        //obtener dir de la variable.
+	            int dirVariable ;
+	            dirVariable= _ts.getDir(id);
+	            accesoVar(_ts.getRegistroTabla(id));//nos deja en la cima su direccion
+	            _etq=_etq+ 3;//revisar si es 4
+	            if (_ts.getRegistroTabla(id).getClase() == EClase.PVAR)
+	                _etq++; //porque en el accesovar habra hecho 4 instr.
+	            //aqui se obtiene el tamaño, o tamaño base de su tipo, para reservar eso
+	            _instrucciones.add(new InstruccionNEW(tipoDeID(id).getTbase().getTam()));
+	            
+	            emparejaToken(TipoToken.ID);
+	            _etq++;
+	            emparejaToken(TipoToken.SEPARADOR);
+	            
+	        }else 
+	            throw new Error(
+	                    "Instr: NEW, intentas hacer NEW a una variable no puntero "
+	                            + _tokenActual.toString());
+	        
+	    }
 
 	public void InstrIf() throws Error {
 		// REVISAR CIRCUITO CORTO
@@ -736,7 +772,7 @@ public class AnalizadorSintactico {
 			PElse();
 			parchea(etq2, _etq);
 		} else
-			throw new Error("InstrIf: El tipo de la expresiï¿½n no es BOOLEAN.");
+			throw new Error("InstrIf: El tipo de la expresión no es BOOLEAN.");
 	}
 
 	public void PElse() throws Error {
@@ -763,7 +799,7 @@ public class AnalizadorSintactico {
 			parchea(etq2, _etq);
 		} else
 			throw new Error(
-					"InstrWhile: El tipo de la expresiï¿½n no es BOOLEAN.");
+					"InstrWhile: El tipo de la expresión no es BOOLEAN.");
 	}
 
 	public void InstrFor() throws Error {
@@ -876,13 +912,13 @@ public class AnalizadorSintactico {
 				emparejaToken(TipoToken.PARCLA);
 			} else
 				throw new Error(
-						"RParams: Nï¿½mero de parï¿½metros reales("
+						"RParams: Número de parámetros reales("
 								+ String.valueOf(nparams)
-								+ ") no corresponde con nï¿½mero de parï¿½metros formales ("
+								+ ") no corresponde con número de parámetros formales ("
 								+ String.valueOf(params.size()) + ")");
 		} else if (params.size() != 0)
 			throw new Error(
-					"RParams: Nï¿½mero de parï¿½metros reales no corresponde con nï¿½mero de parï¿½metros formales ("
+					"RParams: Número de parámetros reales no corresponde con número de parámetros formales ("
 							+ String.valueOf(params.size()) + ")");
 		else
 			emparejaToken(TipoToken.PARCLA);
@@ -946,7 +982,7 @@ public class AnalizadorSintactico {
 					|| compatibles(tipo1, new Tipo(ETipo.NATURAL))
 					|| compatibles(tipo1, new Tipo(ETipo.FLOAT))
 					|| compatibles(tipo1, new Tipo(ETipo.CHAR)))// VER SI
-																// Aï¿½ADIMOS Mï¿½S,
+																// AÑADIMOS MÁS,
 																// COMO ARRAY Y
 																// ESO
 				// Ver la diferencia entre tipos REF y POINTER
@@ -1033,7 +1069,7 @@ public class AnalizadorSintactico {
 			_etq++;
 		} else
 			throw new Error(
-					"InstrEsc: El tipo de la expresiï¿½n entre parï¿½ntesis es ERROR. "
+					"InstrEsc: El tipo de la expresión entre paréntesis es ERROR. "
 							+ tokenTmp.toString());
 	}
 
@@ -1352,7 +1388,7 @@ public class AnalizadorSintactico {
 			codigo = new InstruccionRESTA();
 			tipo = new Tipo(ETipo.NUMERICA);
 			emparejaToken(TipoToken.RESTA);
-			// vamos a dejar el OR aquï¿½
+			// vamos a dejar el OR aquí
 		} else if (_tokenActual.getTipo() == TipoToken.OR) {
 			codigo = new InstruccionOR();
 			tipo = new Tipo(ETipo.BOOLEAN);
@@ -1377,7 +1413,7 @@ public class AnalizadorSintactico {
 			codigo = new InstruccionDIV();
 			tipo = new Tipo(ETipo.NUMERICA);
 			emparejaToken(TipoToken.DIV);
-			// vamos a dejar el AND aquï¿½
+			// vamos a dejar el AND aquí
 		} else if (_tokenActual.getTipo() == TipoToken.AND) {
 			codigo = new InstruccionAND();
 			tipo = new Tipo(ETipo.BOOLEAN);
@@ -1503,7 +1539,7 @@ public class AnalizadorSintactico {
 			return new Tipo(ETipo.ERR);
 		/*
 		 * else if(tOperador== || && (tOperando.tipo == boolean ||
-		 * tOperando.tipo == boolean))//valor abs return <tipo:ï¿½errï¿½>
+		 * tOperando.tipo == boolean))//valor abs return <tipo:’err’>
 		 */
 		else if (tOperador.getTipo() == ETipo.CHAR
 				&& (tOperando.getTipo() == ETipo.INTEGER || tOperando.getTipo() == ETipo.FLOAT))
