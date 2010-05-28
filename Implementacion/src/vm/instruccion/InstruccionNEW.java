@@ -2,6 +2,10 @@ package vm.instruccion;
 
 public class InstruccionNEW extends Instruccion {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8608533947859137958L;
 	//NEW(t):Reserva espacio en el heap para  t celdas 
 	//consecutivas y apila en la cima de la pila la dirección de comienzo.
 	private int tam;

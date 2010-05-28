@@ -2,6 +2,10 @@ package vm.instruccion;
 
 public class InstruccionDISPOSE extends Instruccion {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5037207498394203382L;
 	private int tam;
 	private double dirComienzo;
 	

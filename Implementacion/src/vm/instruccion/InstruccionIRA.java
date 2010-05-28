@@ -1,7 +1,5 @@
 package vm.instruccion;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 
 public class InstruccionIRA extends InstruccionConOperando{
 		
