@@ -142,6 +142,7 @@ public class MaquinaVirtual {
 			for (int i=0;i<bloque;i++)
 				memoria[(int) aux2-i ] =memoria[aux-i];
 		}
+
 		pHeap = pHeap +tam; //para que ahora apunte al siguiente libre
 		//actualizar los otros punteros
 		for(int i=0;i<tamMemoria;i++){

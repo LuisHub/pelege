@@ -29,6 +29,8 @@ public class InstruccionNEW extends Instruccion {
 		vm.operando1 = vm.pila.pop();
 		vm.operando2 = vm.pila.pop();
 		vm.memoria[(int) vm.operando2]=vm.operando1;
+		//limpiar posicion apuntada
+		vm.memoria[(int)vm.operando1]=Double.NEGATIVE_INFINITY;
 		
 		double dirReserva=vm.operando1; //para saber donde se guarda, para actualizar cuando se mueva el heap
 		vm.ponRegistroPuntero(dirReserva, vm.operando2);
