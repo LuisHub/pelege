@@ -40,7 +40,7 @@ public class MaquinaVirtual {
 		//memoria = new double[32];
 		memoria = new double[tamMemoria];
 		for (int i=0; i<tamMemoria; i++)
-			memoria[i] = 0;
+			memoria[i] = Double.NEGATIVE_INFINITY;
 		pila = new Stack<Double>();
 		setPc(0);
 		setSig_pc(1);
