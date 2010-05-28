@@ -85,7 +85,7 @@ public class AnalizadorSintactico {
 		if (_tokenActual.getTipo() == TipoToken.EOF) {
 			emparejaToken(TipoToken.EOF);
 			System.out
-					.println("Se ha realizado el analisis sintï¿½ctico con ï¿½xito.");
+					.println("Se ha realizado el analisis sintáctico con éxito.");
 		}
 	}
 
