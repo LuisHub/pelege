@@ -85,7 +85,7 @@ public class AnalizadorSintactico {
 		if (_tokenActual.getTipo() == TipoToken.EOF) {
 			emparejaToken(TipoToken.EOF);
 			System.out
-					.println("Se ha realizado el analisis sintáctico con éxito.");
+					.println("Se ha realizado el analisis sintï¿½ctico con ï¿½xito.");
 		}
 	}
 
@@ -1090,28 +1090,13 @@ public class AnalizadorSintactico {
 				|| _tokenActual.getTipo() == TipoToken.MENORIGUAL
 				|| _tokenActual.getTipo() == TipoToken.MAYORIGUAL) {
 			
-			if (tipo1.getTipo()==ETipo.POINTER )
-			{
-				if (_tokenActual.getTipo() == TipoToken.IGUAL||_tokenActual.getTipo() == TipoToken.DISTINTO)
-				{
-					
-					Resp resp = OpComp();
-					resp2 = ExpSimple(false);
-					resp1 = new Resp(new Tipo(ETipo.BOOLEAN), EModo.VALOR);
-					_instrucciones.add(resp.getCodigo());
-					this._etq = this._etq + 1;
-				}else resp1 = new Resp(new Tipo(ETipo.ERR), modo1);;
-			}
-			else
-			{
-
 			Resp resp = OpComp();
 			resp2 = ExpSimple(false);
 
-			resp1 = new Resp(tipoDeExpComp(tipo1, resp2.getTipo()), EModo.VALOR);
+			resp1 = new Resp(tipoDeExpComp(tipo1, resp2.getTipo(),resp.getTipo()), EModo.VALOR);
 			_instrucciones.add(resp.getCodigo());
 			this._etq = this._etq + 1;
-			}
+			
 		} else {
 			resp1 = new Resp(tipo1, modo1);
 		}
@@ -1454,11 +1439,11 @@ public class AnalizadorSintactico {
 			emparejaToken(TipoToken.MENOR);
 		} else if (_tokenActual.getTipo() == TipoToken.IGUAL) {
 			codigo = new InstruccionEQ();
-			tipo = new Tipo(ETipo.BOOLEAN);
+			tipo = new Tipo(ETipo.COMPARACION);
 			emparejaToken(TipoToken.IGUAL);
 		} else if (_tokenActual.getTipo() == TipoToken.DISTINTO) {
 			codigo = new InstruccionNEQ();
-			tipo = new Tipo(ETipo.BOOLEAN);
+			tipo = new Tipo(ETipo.COMPARACION);
 			emparejaToken(TipoToken.DISTINTO);
 		} else if (_tokenActual.getTipo() == TipoToken.MAYORIGUAL) {
 			codigo = new InstruccionGE();
@@ -1624,8 +1609,13 @@ public class AnalizadorSintactico {
 
 	}
 
-	public Tipo tipoDeExpComp(Tipo tOperador1, Tipo tOperador2) {
+	public Tipo tipoDeExpComp(Tipo tOperador1, Tipo tOperador2,Tipo tOperacion) {
 		
+		if (tOperador1.getTipo()==ETipo.POINTER 
+			&& tOperador2.getTipo()==ETipo.NULL
+			&& tOperacion.getTipo()==ETipo.COMPARACION)
+			return new Tipo(ETipo.BOOLEAN);
+		else
 		if ((tOperador1.getTipo() == ETipo.ARRAY)
 				|| (tOperador1.getTipo() == ETipo.POINTER)
 				|| (tOperador1.getTipo() == ETipo.NULL)
